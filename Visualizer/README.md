@@ -1,18 +1,16 @@
-# electron-quick-start
+# Simulation
 
-**Clone and run for a quick way to see Electron in action.**
 
-This is a minimal Electron application based on the [Quick Start Guide](https://electronjs.org/docs/tutorial/quick-start) within the Electron documentation.
+This is a responsive application based on the [Electron Framework](https://electronjs.org). It is for the research performed by Florida Polytechnic University researchers:
 
-**Use this app along with the [Electron API Demos](https://electronjs.org/#get-started) app for API code examples to help you get started.**
+    - Dr. Jaimes Luis
 
-A basic Electron application needs just these files:
+**This app loads in [Python](https://www.python.org/) modules and is neccesary to use this app**
 
-- `package.json` - Points to the app's main file and lists its details and dependencies.
-- `main.js` - Starts the app and creates a browser window to render HTML. This is the app's **main process**.
-- `index.html` - A web page to render. This is the app's **renderer process**.
+This application has two associated modules:
 
-You can learn more about each of these components within the [Quick Start Guide](https://electronjs.org/docs/tutorial/quick-start).
+- `exec.py` - This python module sets up an IPC Pipe between the Electron **main process** and **Render process**.
+- `model.py` - This python module is set by the user to process the grid and calculate the path.
 
 ## To Use
 
@@ -20,7 +18,7 @@ To clone and run this repository you'll need [Git](https://git-scm.com) and [Nod
 
 ```bash
 # Clone this repository
-git clone https://github.com/electron/electron-quick-start
+git clone https://github.com/MadJayQ/simulation
 # Go into the repository
 cd electron-quick-start
 # Install dependencies
@@ -29,16 +27,17 @@ npm install
 npm start
 ```
 
-Note: If you're using Linux Bash for Windows, [see this guide](https://www.howtogeek.com/261575/how-to-run-graphical-linux-desktop-applications-from-windows-10s-bash-shell/) or use `node` from the command prompt.
+## Python Module Breakdown
 
-## Resources for Learning Electron
-
-- [electronjs.org/docs](https://electronjs.org/docs) - all of Electron's documentation
-- [electronjs.org/community#boilerplates](https://electronjs.org/community#boilerplates) - sample starter apps created by the community
-- [electron/electron-quick-start](https://github.com/electron/electron-quick-start) - a very basic starter Electron app
-- [electron/simple-samples](https://github.com/electron/simple-samples) - small applications with ideas for taking them further
-- [electron/electron-api-demos](https://github.com/electron/electron-api-demos) - an Electron app that teaches you how to use Electron
-- [hokein/electron-sample-apps](https://github.com/hokein/electron-sample-apps) - small demo apps for the various Electron APIs
+```python
+paths = [
+    [(0, 0), (0, 1), (1, 1), (2, 1), (3, 1), (3, 2)],
+    [(1, 0), (1, 1), (1, 2), (1, 3), (1, 4)],
+    [(2, 0), (2, 1), (2, 2), (2, 3), (2 , 4)]
+];
+def solvePath(grid, car, start, finish):
+    return paths[car - 1];
+```
 
 ## License
 
