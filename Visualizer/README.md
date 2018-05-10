@@ -4,6 +4,7 @@
 This is a responsive application based on the [Electron Framework](https://electronjs.org). It is for the research performed by Florida Polytechnic University researchers:
 
     - Dr. Jaimes Luis
+    - Dr. Mustafa Ilhan Akbas
 
 **This app loads in [Python](https://www.python.org/) modules and is neccesary to use this app**
 
