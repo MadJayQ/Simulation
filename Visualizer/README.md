@@ -6,11 +6,13 @@ This is a responsive application based on the [Electron Framework](https://elect
     - Dr. Jaimes Luis
     - Dr. Mustafa Ilhan Akbas
 
+More information about their research can be found [here](https://nsf.gov/awardsearch/showAward?AWD_ID=1739409&HistoricalAwards=false)
+
 **This app loads in [Python](https://www.python.org/) modules and is neccesary to use this app**
 
 This application has two associated modules:
 
-- `exec.py` - This python module sets up an IPC Pipe between the Electron **main process** and **Render process**.
+- `exec.py` - This python module sets up an IPC Pipe between the Electron **main process** and **render process**.
 - `model.py` - This python module is set by the user to process the grid and calculate the path.
 
 ## To Use
