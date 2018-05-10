@@ -21,9 +21,9 @@ To clone and run this repository you'll need [Git](https://git-scm.com) and [Nod
 
 ```bash
 # Clone this repository
-git clone https://github.com/MadJayQ/simulation
+git clone https://github.com/MadJayQ/Simulation
 # Go into the repository
-cd electron-quick-start
+cd Simulation
 # Install dependencies
 npm install
 # Run the app
