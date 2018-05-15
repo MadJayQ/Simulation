@@ -36,6 +36,12 @@ var grid = JSON.parse(ipcRenderer.sendSync('synchronous-message', 'grid'));
 
 var colors = ['red', 'blue', 'green', 'white', 'black'];
 
+function clickOnPip() {
+	var value = Number(this.getAttribute('data-value'));
+	slider.noUiSlider.set(value);
+	var currentVal = slider.noUiSlider.options.format.from(slider.noUiSlider.get());
+}
+
 function updateSlider() {
 	var maxTime = ipcRenderer.sendSync('synchronous-message', 'query-time');
 	var values = [];
@@ -47,7 +53,7 @@ function updateSlider() {
 	}
 	values.push(maxTime);
 	
-	console.log(values);
+	console.log(maxTime);
 	
 	slider.noUiSlider.updateOptions({
 		range: {
@@ -55,6 +61,7 @@ function updateSlider() {
 			max: maxTime
 		}
 	});
+
 	slider.noUiSlider.pips({
 		mode: 'values',
 		values: values,
@@ -71,15 +78,7 @@ function updateSlider() {
 	
 	var pips = slider.querySelectorAll('.noUi-value');
 	
-	function clickOnPip ( ) {
-			var value = Number(this.getAttribute('data-value'));
-			slider.noUiSlider.set(value);
-			var currentVal = slider.noUiSlider.options.format.from(slider.noUiSlider.get());
-	}
-	
 	for ( var i = 0; i < pips.length; i++ ) {
-	
-			// For this example. Do this in CSS!
 			pips[i].style.cursor = 'pointer';
 			pips[i].addEventListener('click', clickOnPip);
 	}
@@ -162,7 +161,7 @@ $(() => {
         });
         
         ipcRenderer.on('asynchronous-reply', (event, arg) => {
-			
+
         });
         updateSlider();
     }

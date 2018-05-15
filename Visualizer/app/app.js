@@ -25,14 +25,14 @@ class App {
                 overwrite: true
             };
             fsextra.copySync(filePath, path.resolve(__dirname, '../scripts/model.py'), {overwrite: true});
-            self.buildPaths();
-            event.returnValue = 0;
+            self.buildPaths(event);
             event.sender.startDrag({
               file: filePath,
               icon: '/assets/upload_icon.png'
             });
         });
         this.buildPaths();
+        var self = this;
         ipcMain.on('synchronous-message', (event, arg) => {
             if(arg == "grid") {
                 var data = {
@@ -91,13 +91,14 @@ class App {
         //this.ctx = this.canvas.getContext("2d");
         return true;
     }
-    buildPaths() {
+    buildPaths(event) {
         var merged = [].concat.apply([], this.grid.grid);
         console.log(merged);
         if(this.pyshell) {
             this.pyshell.terminate();
             this.pyshell = null;
         }
+        this.waiting = true;
         this.pyshell = new python('/scripts/exec.py', {pythonOptions: ['-B'], args: [merged, this.grid.size, this.grid.numCars]});
         this.pyshell.stdout.on('data', (data) => {
             try {
@@ -106,6 +107,9 @@ class App {
                     this.paths[i - 1] = dat[i]["path"];
                     this.ends[i - 1] = dat[i]["end"];
                     console.log(dat[i]["path"]);
+                }
+                if(event !== undefined) {
+                    event.returnValue = 0;
                 }
             } catch(err) {
                 console.log("NOT JSON: " + data + ":" + err);
