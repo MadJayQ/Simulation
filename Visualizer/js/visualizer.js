@@ -83,8 +83,6 @@ function updateSlider() {
 			pips[i].style.cursor = 'pointer';
 			pips[i].addEventListener('click', clickOnPip);
 	}
-	
-	console.log("SLIDER UPDATED!");
 }
 
 var format = wNumb({
@@ -106,7 +104,6 @@ function drawSimulation() {
 	var simulation = JSON.parse(ipcRenderer.sendSync('synchronous-message', timeStr));
 
 	for(var i = 0; i < gridData.length; i++) {
-		console.log(size);
 		var row = Math.floor(i / size);
 		var col = i % size;
 		var color = colors[(col + row) % size];
@@ -130,6 +127,7 @@ function drawSimulation() {
 		ctx.rect((col * w) + (fracx * w), (row * h) + (fracy * h), w, h);
 		ctx.fill();
 		ctx.stroke();
+		ctx.beginPath();
 	}
 }
 
@@ -160,12 +158,11 @@ $(() => {
         
         slider.noUiSlider.on('update.one', () => {
             time = slider.noUiSlider.get();
-            console.log(time);
             drawSimulation();
         });
         
         ipcRenderer.on('asynchronous-reply', (event, arg) => {
-            console.log(arg);
+			
         });
         updateSlider();
     }

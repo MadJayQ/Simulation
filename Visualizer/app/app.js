@@ -94,7 +94,11 @@ class App {
     buildPaths() {
         var merged = [].concat.apply([], this.grid.grid);
         console.log(merged);
-        this.pyshell = new python('/scripts/exec.py', {args: [merged, this.grid.size, this.grid.numCars]});
+        if(this.pyshell) {
+            this.pyshell.terminate();
+            this.pyshell = null;
+        }
+        this.pyshell = new python('/scripts/exec.py', {pythonOptions: ['-B'], args: [merged, this.grid.size, this.grid.numCars]});
         this.pyshell.stdout.on('data', (data) => {
             try {
                 var dat = JSON.parse(data);

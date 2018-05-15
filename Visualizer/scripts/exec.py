@@ -1,4 +1,4 @@
-import sys, json
+import sys, json, time
 
 from model import solvePath
 
@@ -39,6 +39,8 @@ def main():
                 data[i]["end"] = end;
             print(json.dumps(data));
         sys.stdout.flush();
+        time.sleep(0.1);
+        
 
 if __name__ == '__main__':
     main();

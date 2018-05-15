@@ -61,7 +61,6 @@ $(function() {
         hideHover: 'auto',
         resize: true
     });
-    */
 
     Morris.Donut({
         element: 'morris-donut-chart',
@@ -78,7 +77,6 @@ $(function() {
         resize: true
     });
 
-    /*
     Morris.Bar({
         element: 'morris-bar-chart',
         data: [{
