@@ -13,3 +13,19 @@
 #drag-n-drop {
     z-index: 0;
 }
+
+#editor {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    margin-left: 0%;
+    margin-right: 0%;
+}
+
+textarea.code-editor {
+    background-color: gray;
+    color: #fff;
+    resize: none;
+    width: 100%;
+    height: 100%;
+}

@@ -117,16 +117,35 @@ function drawSimulation() {
 		ctx.strokeStyle = 'black';
 		var fracx = 0.0;
 		var fracy = 0.0;
-		var row = simulation[j]["path"][0];
-		var col = simulation[j]["path"][1];
+		var idx = Number(simulation[j]["idx"]);
+		var row = simulation[j]["path"][idx][0];
+		var col = simulation[j]["path"][idx][1];
 		ctx.fillStyle = colors[j];
 		fracx = simulation[j]["frac_x"] || 0;
 		fracy = simulation[j]["frac_y"] || 0;
+		var path = simulation[j]["path"];
+		for(var i = 0; i < path.length; i++) {
+			var prow = path[i][0];
+			var pcol = path[i][1];
+			ctx.beginPath();
+			ctx.arc((pcol * w) + (w / 2), (prow * h) + (h / 2), 5, 0, 360, false);
+			ctx.fill();
+			ctx.stroke();
+			if(i > 0) {
+				var prevRow = path[i - 1][0];
+				var prevCol = path[i - 1][1];
+				ctx.beginPath();
+				ctx.strokeStyle = colors[j];
+				ctx.moveTo((prevCol * w) + (w / 2), (prevRow * h) + (h / 2));
+				ctx.lineTo((pcol * w) + (w / 2), (prow * h) + (h / 2));
+				ctx.stroke();
+				ctx.strokeStyle = "black";
+			}
+		}
 		ctx.beginPath();
 		ctx.rect((col * w) + (fracx * w), (row * h) + (fracy * h), w, h);
 		ctx.fill();
 		ctx.stroke();
-		ctx.beginPath();
 	}
 }
 
@@ -135,7 +154,10 @@ $(() => {
     $(window).bind("load resize", () => {
         //canvas.width = canvas.clientWidth;
         //canvas.height = canvas.clientHeight;
-    });
+	});
+	$(window).bind("resize", () => {
+		drawSimulation();
+	});
     if(slider) {
         noUiSlider.create(slider, {
             start: [0],

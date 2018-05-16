@@ -52,6 +52,14 @@ class App {
                 }
                 event.returnValue = (max - 1);
             }
+            if(arg == "restart-pyshell") {
+                this.buildPaths(event);
+            }
+            if(arg.startsWith("query-path-")) {
+                var car = Number(arg.replace("query-path-", ''));
+                console.log("Car number: " + car + " is requesting path information!");
+                event.returnValue = "";
+            }
             if(arg.startsWith("query-simulation-")) {
                 var format = wNumb({decimals: 2});
                 var time = format.from(arg.replace("query-simulation-", ''));
@@ -81,7 +89,8 @@ class App {
                     } else {
                         data[i]["frac_x"] = 0.0;
                     }
-                    data[i]["path"] = self.paths[i][idx];
+                    data[i]["path"] = self.paths[i];
+                    data[i]["idx"] = idx;
                 }
                 console.log(JSON.stringify(data));
                 event.returnValue = JSON.stringify(data);

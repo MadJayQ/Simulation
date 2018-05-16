@@ -2,7 +2,6 @@ import sys, json, time
 
 from model import solvePath
 
-
 def chunkify(seq, num):
     avg = len(seq) / float(num)
     out = []
