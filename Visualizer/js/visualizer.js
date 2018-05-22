@@ -149,6 +149,10 @@ function drawSimulation() {
 	}
 }
 
+module.exports.updateSlider = updateSlider;
+module.exports.drawSimulation = drawSimulation;
+module.exports.grid = grid;
+
 
 $(() => {
     $(window).bind("load resize", () => {

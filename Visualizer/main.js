@@ -22,7 +22,6 @@ function createWindow () {
     slashes: true
   }))
 
-  console.log("STARTING APP");
   require('./app/app.js');
 
   // Open the DevTools.

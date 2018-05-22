@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Bootstrap Admin Theme</title>
+    <title>Visualizer</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -295,6 +295,9 @@
                                 </li>
                             </ul>
                         </li>
+                        <li>
+                            <a href="grid.html"><i class="fa fa-code fa-fw"></i> Grid</a>
+                        </li>
                     </ul>
                 </div>
                 <!-- /.sidebar-collapse -->
@@ -446,9 +449,49 @@
                         <div class="panel-heading">
                             <i class="fa fa-search fa-fw"></i> Inspector
                         </div>
-                        <div class="panel-body">
+                        <div class="panel-body" style="overflow-y: scroll">
                             <div id="inspector" style="height:50rem;">
-                                Hello World
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="panel-group">
+                                            <div class="panel-heading">
+                                                <h4 class="panel title">
+                                                    <a data-toggle="collapse" href="#carlocations">Car Locations</a>
+                                                </h4>
+                                            </div>
+                                            <div id="carlocations" class="panel-collapse collapse">
+                                                <div id="car-panel" class="panel-body"></div>
+                                                <div class="panel-footer">
+                                                    <button id="newCarBtn" class="btn btn-block">New Car</button>
+                                                </div>
+                                            </div>
+                                            <div class="panel-heading">
+                                                <h4 class="panel title">
+                                                    <a data-toggle="collapse" href="#gridsize">Grid Size</a>
+                                                </h4>
+                                            </div>
+                                            <div id="gridsize" class="panel-collapse collapse">
+                                                <div class="panel-body">      
+                                                    <div class="container-fluid">
+                                                        <form style="display: table">
+                                                            <p style="display: table-row">
+                                                                <label style="display: table-cell">Width:</label>
+                                                                <input style="display: table-cell" type="text" name="width"><br/>
+                                                            </p>
+                                                            <p style="display: table-row">
+                                                                <label style="display: table-cell">Height:</label>
+                                                                <input style="display: table-cell" type="text" name="height"><br/>
+                                                            </p>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <div class="panel-footer">
+                                                    <button id="applyBtn" class="btn btn-block">Apply Changes</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- /.panel-body -->
@@ -702,6 +745,10 @@
     <!-- Module List Script -->
     <script type="text/javascript">
         require('../js/module-list.js')
+    </script>
+
+    <script type="text/javascript">
+        require('../js/inspector.js');
     </script>
 
     <!-- Custom Theme JavaScript -->
