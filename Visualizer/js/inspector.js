@@ -8,15 +8,20 @@ var tabTemplate = "<div class=\"panel-heading\"> " +
 "</div>" +
 "<div id=\"car-%CARNUM%-sub\" class=\"panel-collapse collapse\">" + 
 "<div id=\"car-%CARNUM%-body\" class=\"panel-body\"></div>" + 
+"<div id=\"car-%CARNUM%-footer\" class=\"panel-footer\"><button class=\"btn\">Delete</button></div>" +
 "</div>";
 
 var carEditorTemplate = "<div class=\"container-fluid\">" + 
-                        "<div class=\"row\">" + 
-                        "<label for=\"x-input-%CARNUM%\">X:</label>" + 
-                        "<input id=\"x-input-%CARNUM%\" type=\"text\"></input>" +
-                        "<label for=\"y-input-%CARNUM%\">Y:</label>" + 
-                        "<input id=\"y-input-%CARNUM%\" type=\"text\"></input>" +
-                        "</div>" +
+                        "<form style=\"display: table\">" +
+                        "<p style=\"display: table-row\">" + 
+                        "<label style=\"display: table-cell\">X:</label>" + 
+                        "<input style=\"display: table-cell\" id=\"x-input-%CARNUM%\" type=\"text\"></input>" +
+                        "</p>" +
+                        "<p style=\"display: table-row\">" + 
+                        "<label style=\"display: table-cell\">Y:</label>" + 
+                        "<input style=\"display: table-cell\" id=\"y-input-%CARNUM%\" type=\"text\"></input>" +
+                        "</p>" +
+                        "</form>" +
                         "</div>";
 
 function createCarTab(carNum, grid) {
@@ -39,6 +44,18 @@ function gridSizeChanged(e) {
     visualizer.requeryGrid();
     visualizer.drawSimulation();
 }
+function deleteCar(e) {
+
+}
+function newCar(e) {
+    var grid = visualizer.grid;
+    var newCar = ++grid.numCars;
+    cars.set(newCar, {
+        pos: [newCar - 1, 0],
+        tab: createCarTab(newCar, visualizer.grid)
+    });
+
+}
 
 $(() => {
     var grid = visualizer.grid.gridData;
@@ -58,4 +75,5 @@ $(() => {
     }
     $("#size-input").val(visualizer.grid.size);
     $("#gridApplyBtn").click(gridSizeChanged);
+    $("#newCarBtn").click(newCar);
 });

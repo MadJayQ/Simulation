@@ -161,10 +161,6 @@ module.exports.grid = grid;
 
 
 $(() => {
-    $(window).bind("load resize", () => {
-        //canvas.width = canvas.clientWidth;
-        //canvas.height = canvas.clientHeight;
-	});
 	$(window).bind("resize", () => {
 		drawSimulation();
 	});
