@@ -1,3 +1,5 @@
+const {ipcRenderer} = require('electron');
+
 var cars = new Map();
 var tabTemplate = "<div class=\"panel-heading\"> " + 
     "<h6 class=\"panel title\"> " +
@@ -28,9 +30,17 @@ function createCarTab(carNum, grid) {
     return panel;
 }
 
+var visualizer = require('./visualizer.js');
+
+function gridSizeChanged(e) {
+    var updateString = "update-simulation-grid-size-";
+    updateString += Buffer.from($("#size-input").val()).toString('base64');
+    ipcRenderer.sendSync('synchronous-message', updateString);
+    visualizer.requeryGrid();
+    visualizer.drawSimulation();
+}
 
 $(() => {
-    var visualizer = require('./visualizer.js');
     var grid = visualizer.grid.gridData;
     for(var i = 0; i < grid.length; i++) {
         var carIdx = Math.abs(grid[i]);
@@ -46,4 +56,6 @@ $(() => {
             }
         }
     }
+    $("#size-input").val(visualizer.grid.size);
+    $("#gridApplyBtn").click(gridSizeChanged);
 });

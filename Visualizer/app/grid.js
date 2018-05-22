@@ -3,13 +3,17 @@ module.exports = class Grid {
     constructor(size, numCars) {
         this.size = size;
         this.numCars = numCars;
-        this.grid = [
-            [1, 0, 0, 0, -1],
-            [-2, 0, 0, 0, -2],
-            [-3, 0, 0, 0, -3],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0]
-        ];
+        var carIdx = 1;
+        this.grid = [];
+        for(var i = 0; i < this.size; i++) {
+            this.grid[i] = [];
+            for(var j = 0; j < this.size; j++) {
+                this.grid[i][j] = 0;
+                if(j == 0 && carIdx <= this.numCars) this.grid[i][j] = (carIdx);
+                if(j == this.size - 1 && carIdx <= this.numCars) this.grid[i][j] = (-carIdx);
+            }
+            carIdx++;
+        }
     }
     /*
     constructor(size, numCars) {

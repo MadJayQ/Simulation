@@ -34,7 +34,12 @@ dropzone.addEventListener("dragover", (event) => {
 
 var grid = JSON.parse(ipcRenderer.sendSync('synchronous-message', 'grid'));
 
-var colors = ['red', 'blue', 'green', 'white', 'black'];
+var colors = ['red', 'blue', 'green', 'purple', 'black'];
+
+
+function requeryGrid() {
+	grid = JSON.parse(ipcRenderer.sendSync('synchronous-message', 'grid'));
+}
 
 function clickOnPip() {
 	var value = Number(this.getAttribute('data-value'));
@@ -151,6 +156,7 @@ function drawSimulation() {
 
 module.exports.updateSlider = updateSlider;
 module.exports.drawSimulation = drawSimulation;
+module.exports.requeryGrid = requeryGrid;
 module.exports.grid = grid;
 
 

@@ -12,10 +12,12 @@ class App {
     constructor() {
         this.paths = [];
         this.ends = [];
+        this.gridSize = 5;
+        this.numCars = 4;
     }
     
     initialize() {
-        this.grid = new Grid(5, 3);
+        this.grid = new Grid(this.gridSize, this.numCars);
 
         //ipcMain.send('asynchronous-message', [].concat.apply([], this.grid.grid));
         var self = this;
@@ -60,6 +62,15 @@ class App {
                 console.log("Car number: " + car + " is requesting path information!");
                 event.returnValue = "";
             }
+            if(arg.startsWith("update-simulation-grid-size-")) {
+                var gridSize = Buffer.from(
+                    arg.replace("update-simulation-grid-size-", ''),
+                    'base64'
+                ).toString('ascii');
+                this.gridSize = Number(gridSize);
+                this.grid = new Grid(this.gridSize, this.numCars);
+                event.returnValue = "";
+            }
             if(arg.startsWith("query-simulation-")) {
                 var format = wNumb({decimals: 2});
                 var time = format.from(arg.replace("query-simulation-", ''));
@@ -71,6 +82,9 @@ class App {
                     var idx = Math.floor(time);
                     var frac = time - Math.floor(time);
                     var next = idx + 1;
+                    if(self.paths[i] == undefined) {
+                        continue;
+                    }
                     if(idx >= self.paths[i].length) {
                         idx = self.paths[i].length - 1;
                     }
@@ -102,7 +116,7 @@ class App {
     }
     buildPaths(event) {
         var merged = [].concat.apply([], this.grid.grid);
-        console.log(merged);
+        //console.log(merged);
         if(this.pyshell) {
             this.pyshell.terminate();
             this.pyshell = null;
