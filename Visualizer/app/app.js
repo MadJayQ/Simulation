@@ -38,9 +38,9 @@ class App {
         ipcMain.on('synchronous-message', (event, arg) => {
             if(arg == "grid") {
                 var data = {
-                    numCars: self.grid.numCars,
-                    size: self.grid.size,
-                    gridData: [].concat.apply([], self.grid.grid)
+                    numCars: this.grid.numCars,
+                    size: this.grid.size,
+                    gridData: [].concat.apply([], this.grid.grid)
                 };
                 console.log(JSON.stringify(data));
                 event.returnValue = JSON.stringify(data);
@@ -68,8 +68,32 @@ class App {
                     'base64'
                 ).toString('ascii');
                 this.gridSize = Number(gridSize);
-                this.grid = new Grid(this.gridSize, this.numCars);
+                while(this.grid.grid.length < this.gridSize) {
+                    var list = [];
+                    for(var i = 0; i < this.gridSize; i++) {
+                        list[i] = 0;
+                    }
+                    this.grid.grid.push(list);
+                }
+                for(var i = 0; i < this.grid.grid.length; i++) {
+                    var row = this.grid.grid[i];
+                    while(row.length < this.gridSize) {
+                        row.push(0);
+                    }
+                }
+                this.grid = new Grid(this.gridSize, this.numCars, [].concat.apply([], this.grid.grid));
                 event.returnValue = "";
+            }
+            if(arg.startsWith("simulation-update-grid-")) {
+                console.log(arg);
+                var gridData = arg.replace("simulation-update-grid-", '');
+                gridData = Buffer.from(gridData, 'base64').toString('ascii');
+                var grid = JSON.parse(gridData);
+                this.numCars = grid.numCars;
+                this.gridSize = grid.size;
+                this.grid = new Grid(grid.size, grid.numCars, grid.gridData);
+                this.buildPaths(event);
+                console.log(this.grid.grid);
             }
             if(arg.startsWith("query-simulation-")) {
                 var format = wNumb({decimals: 2});
@@ -92,16 +116,18 @@ class App {
                         next = self.paths[i].length - 1;
                     }
                     data[i] = {};
-                    if(self.paths[i][idx][0] < (self.paths[i][next][0])) {
-                        data[i]["frac_y"] = frac;
-                    }
-                    else {
-                        data[i]["frac_y"] = 0.0;
-                    }
-                    if(self.paths[i][idx][1] < self.paths[i][next][1]) {
-                        data[i]["frac_x"] = frac;
-                    } else {
-                        data[i]["frac_x"] = 0.0;
+                    if(self.paths[i][idx]) {
+                        if(self.paths[i][idx][0] < (self.paths[i][next][0])) {
+                            data[i]["frac_y"] = frac;
+                        }
+                        else {
+                            data[i]["frac_y"] = 0.0;
+                        }
+                        if(self.paths[i][idx][1] < self.paths[i][next][1]) {
+                            data[i]["frac_x"] = frac;
+                        } else {
+                            data[i]["frac_x"] = 0.0;
+                        }
                     }
                     data[i]["path"] = self.paths[i];
                     data[i]["idx"] = idx;

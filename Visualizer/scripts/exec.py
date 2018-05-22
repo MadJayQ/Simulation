@@ -15,11 +15,13 @@ def findStart(car, grid, size):
         for j in range(0, size):
             if grid[i][j] == car:
                 return (i, j);
+    return (0, 0);
 def findEnd(car, grid, size):
     for i in range(0, size):
         for j in range(0, size):
             if grid[i][j] == -car:
                 return (i, j);
+    return (0, 0);
 def main():
     while True:
         command = sys.stdin.readline()

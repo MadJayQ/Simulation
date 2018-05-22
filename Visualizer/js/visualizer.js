@@ -34,11 +34,12 @@ dropzone.addEventListener("dragover", (event) => {
 
 var grid = JSON.parse(ipcRenderer.sendSync('synchronous-message', 'grid'));
 
-var colors = ['red', 'blue', 'green', 'purple', 'black'];
+var colors = ['red', 'blue', 'green', 'purple', 'black', 'orange', 'cyan', 'gray'];
 
 
 function requeryGrid() {
 	grid = JSON.parse(ipcRenderer.sendSync('synchronous-message', 'grid'));
+	return grid;
 }
 
 function clickOnPip() {
@@ -94,6 +95,15 @@ var format = wNumb({
 });
 
 
+function isInGrid(carNum, grid) {
+	for(var i = 0; i < grid.length; i++) {
+		if(grid[i] == carNum || grid[i] == -carNum) {
+			return true;
+		}
+	}
+	return false;
+}
+
 function drawSimulation() {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
@@ -110,7 +120,7 @@ function drawSimulation() {
 	for(var i = 0; i < gridData.length; i++) {
 		var row = Math.floor(i / size);
 		var col = i % size;
-		var color = colors[(col + row) % size];
+		var color = colors[((col + row) % size)];
 		ctx.fillStyle = 'white';
 		ctx.strokeStyle = 'black';
 		ctx.beginPath();
@@ -119,13 +129,14 @@ function drawSimulation() {
 		ctx.stroke();
 	}
 	for(var j = 0; j < numCars; j++) {
+		if(!isInGrid(j + 1, gridData)) continue;
 		ctx.strokeStyle = 'black';
 		var fracx = 0.0;
 		var fracy = 0.0;
 		var idx = Number(simulation[j]["idx"]);
 		var row = simulation[j]["path"][idx][0];
 		var col = simulation[j]["path"][idx][1];
-		ctx.fillStyle = colors[j];
+		ctx.fillStyle = colors[j % colors.length];
 		fracx = simulation[j]["frac_x"] || 0;
 		fracy = simulation[j]["frac_y"] || 0;
 		var path = simulation[j]["path"];
@@ -151,6 +162,10 @@ function drawSimulation() {
 		ctx.rect((col * w) + (fracx * w), (row * h) + (fracy * h), w, h);
 		ctx.fill();
 		ctx.stroke();
+		console.log(j);
+		ctx.font = '20px serif';
+		ctx.fillStyle = 'white';
+		ctx.fillText("Car " + (j + 1), (col * w) + (fracx * w) + (w / 4), (row * h) + (fracy * h) + (h / 2), w);
 	}
 }
 
