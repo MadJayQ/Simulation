@@ -10,21 +10,22 @@ var tabTemplate = "<div class=\"panel-heading\"> " +
 
 var carEditorTemplate = "<div class=\"container-fluid\">" + 
                         "<div class=\"row\">" + 
-                        "<label for=\"x-input\">X:</label>" + 
-                        "<input id=\"x-input\" type=\"text\"></input>" +
-                        "<label for=\"y-input\">Y:</label>" + 
-                        "<input id=\"y-input\" type=\"text\"></input>" +
+                        "<label for=\"x-input-%CARNUM%\">X:</label>" + 
+                        "<input id=\"x-input-%CARNUM%\" type=\"text\"></input>" +
+                        "<label for=\"y-input-%CARNUM%\">Y:</label>" + 
+                        "<input id=\"y-input-%CARNUM%\" type=\"text\"></input>" +
                         "</div>" +
                         "</div>";
 
-function createCarTab(carNum) {
+function createCarTab(carNum, grid) {
     var tabHtml = (' ' + tabTemplate).slice(1);
     tabHtml = tabHtml.split("%CARNUM%").join(carNum);
     var panel = $(tabHtml);
     $("#car-panel").append(panel);
     $("#car-" + carNum + "-body").append(
-        $(carEditorTemplate)
+        $(carEditorTemplate.split("%CARNUM%").join(carNum))
     );
+    return panel;
 }
 
 
@@ -35,7 +36,13 @@ $(() => {
         var carIdx = Math.abs(grid[i]);
         if(carIdx != 0) {
             if(!cars.has(carIdx)) {
-                cars.set(carIdx, createCarTab(carIdx));
+                cars.set(carIdx, {
+                    pos: [Math.floor(i / visualizer.grid.size), i % visualizer.grid.size],
+                    tab: createCarTab(carIdx, visualizer.grid)
+                });
+                console.log(cars.get(carIdx));
+                $("#x-input-" + carIdx).val(cars.get(carIdx).pos[0]);
+                $("#y-input-" + carIdx).val(cars.get(carIdx).pos[1]);
             }
         }
     }
