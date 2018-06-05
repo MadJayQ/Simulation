@@ -7,6 +7,10 @@ const python = require('python-shell');
 const { ipcMain } = require('electron')
 const wNumb = require('wNumb');
 
+const Car = require('./Simulation/Car.js');
+const World = require('./Simulation/World.js');
+const Settings = require('./Settings/Settings.js');
+
 
 class App {
     constructor() {
@@ -14,6 +18,7 @@ class App {
         this.ends = [];
         this.gridSize = 5;
         this.numCars = 4;
+        this.world = new World.Builder().fromSettings(Settings).build();
     }
     
     initialize() {
@@ -59,7 +64,6 @@ class App {
             }
             if(arg.startsWith("query-path-")) {
                 var car = Number(arg.replace("query-path-", ''));
-                console.log("Car number: " + car + " is requesting path information!");
                 event.returnValue = "";
             }
             if(arg.startsWith("update-simulation-grid-size-")) {
@@ -93,7 +97,6 @@ class App {
                 this.gridSize = grid.size;
                 this.grid = new Grid(grid.size, grid.numCars, grid.gridData);
                 this.buildPaths(event);
-                console.log(this.grid.grid);
             }
             if(arg.startsWith("query-simulation-")) {
                 var format = wNumb({decimals: 2});
