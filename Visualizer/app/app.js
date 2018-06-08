@@ -10,6 +10,12 @@ const wNumb = require('wNumb');
 const Car = require('./Simulation/Car.js');
 const World = require('./Simulation/World.js');
 const Settings = require('./Settings/Settings.js');
+const TileSettings = require('./Settings/TileSettings.js');
+const CarSettings = require('./Settings/CarSettings.js');
+const CrowdSourcerSettings = require('./Settings/CrowdSourcerSettings.js');
+
+const PythonInterpreter = require('./Commands/PythonInterpreter.js');
+const CommandInterpreter = require('./Commands/CommandInterpreter.js');
 
 
 class App {
@@ -18,10 +24,20 @@ class App {
         this.ends = [];
         this.gridSize = 5;
         this.numCars = 4;
-        this.world = new World.Builder().fromSettings(Settings).build();
     }
     
     initialize() {
+        this.world = new World.Builder().
+                    applySettings(Settings).
+                    applyTileSettings(TileSettings).
+                    applyCrowdSourcerSettings(CrowdSourcerSettings).
+                    applyCarSettings(CarSettings).
+                    build();
+        this.commandInterpreter = new CommandInterpreter(ipcMain);
+        this.pythonInterpreter = new PythonInterpreter('/scripts/exec.py'); //Create our executor
+        this.pythonInterpreter.startModule(this.world);
+        //this.pythonInterpreter.runModule();
+        /*
         this.grid = new Grid(this.gridSize, this.numCars);
 
         //ipcMain.send('asynchronous-message', [].concat.apply([], this.grid.grid));
@@ -141,6 +157,7 @@ class App {
         });
         //this.canvas = $("#draw-canvas").get(0);
         //this.ctx = this.canvas.getContext("2d");
+        */
         return true;
     }
     buildPaths(event) {

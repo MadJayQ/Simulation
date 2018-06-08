@@ -5,8 +5,6 @@ const wNumb = require('wNumb');
 var slider = $("#time-scrubber").get(0);
 
 /*
-    Setup Python Module Drag-N-Drop
-*/
 
 var dropzone = $("#dropzone").get(0);
 var canvas = $("#draw-canvas").get(0);
@@ -209,4 +207,18 @@ $(() => {
         updateSlider();
     }
     drawSimulation();
+});
+*/
+
+const Command = require('../app/Commands/Command.js');
+function drawSimulation() {
+	
+}
+
+$(() => {
+	$(window).bind("resize", () => {
+		drawSimulation();
+	});
+
+	drawSimulation();
 });

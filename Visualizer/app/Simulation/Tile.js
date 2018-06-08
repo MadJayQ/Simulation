@@ -3,6 +3,7 @@ class Tile {
         this.pos = [x, y];
         this.tID = tID;
         this.attachedEnts = {};
+        this.traversable = true;
     }
 }
 

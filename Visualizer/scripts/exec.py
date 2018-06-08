@@ -2,6 +2,8 @@ import sys, json, time
 
 from model import solvePath
 
+running = True;
+
 def chunkify(seq, num):
     avg = len(seq) / float(num)
     out = []
@@ -22,24 +24,18 @@ def findEnd(car, grid, size):
             if grid[i][j] == -car:
                 return (i, j);
     return (0, 0);
+def runSimulation():
+    worldJSON = json.loads(sys.argv[1]);
+    print(worldJSON["settings"]["carSettings"]);
+    sys.stdout.flush();
+    running = False;
 def main():
-    while True:
-        command = sys.stdin.readline()
-        command = command.split('\n')[0]
-        if command == "start":
-            gridSize = int(sys.argv[2]);
-            grid = chunkify([int(i) for i in sys.argv[1].split(',')], gridSize);
-            numCars = int(sys.argv[3]);
-            data = {}
-            for i in range(1, numCars + 1):
-                data[i] = {};
-                start = findStart(i, grid, gridSize);
-                end = findEnd(i, grid, gridSize);
-                data[i]["path"] = solvePath(grid, i, start, end);
-                data[i]["start"] = start;
-                data[i]["end"] = end;
-            print(json.dumps(data));
+    while running:
+        command = sys.stdin.readline().split('\n')[0];
+        sys.stdout.write(command);
         sys.stdout.flush();
+        if command == "start":
+            runSimulation()
         time.sleep(0.1);
         
 
