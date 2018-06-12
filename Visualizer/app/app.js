@@ -16,6 +16,7 @@ const CrowdSourcerSettings = require('./Settings/CrowdSourcerSettings.js');
 
 const PythonInterpreter = require('./Commands/PythonInterpreter.js');
 const CommandInterpreter = require('./Commands/CommandInterpreter.js');
+const Commands = require('./Commands/Command.js');
 
 
 class App {
@@ -36,6 +37,9 @@ class App {
         this.commandInterpreter = new CommandInterpreter(ipcMain);
         this.pythonInterpreter = new PythonInterpreter('/scripts/exec.py'); //Create our executor
         this.pythonInterpreter.startModule(this.world);
+        this.commandInterpreter.registerCommand(
+            new Commands.GridCommand(this.world)
+        );
         //this.pythonInterpreter.runModule();
         /*
         this.grid = new Grid(this.gridSize, this.numCars);

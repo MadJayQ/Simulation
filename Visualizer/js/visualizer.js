@@ -4,10 +4,11 @@ const wNumb = require('wNumb');
 
 var slider = $("#time-scrubber").get(0);
 
-/*
-
 var dropzone = $("#dropzone").get(0);
 var canvas = $("#draw-canvas").get(0);
+var ctx = canvas.getContext("2d");
+
+/*
 
 dropzone.addEventListener("drop", (event) => {
   event.preventDefault();
@@ -210,15 +211,50 @@ $(() => {
 });
 */
 
-const Command = require('../app/Commands/Command.js');
+const Commands = require('../app/Commands/Command.js');
+const NetMsg = require('../app/Commands/NetMsg.js');
+const SimulationWorld = require('../app/Simulation/World.js');
+
+ipcRenderer.on("asynchronous-reply", (event, arg) => {
+	var possibleCommand = new NetMsg.Verify(arg);
+	if(possibleCommand.isMessage()) {
+		switch(possibleCommand.messageObj.type) {
+			case NetMsg.Type.TYPE_COMMAND_RESPONSE: {
+				handleCommandResponse(possibleCommand.messageObj.body);
+			}
+		}
+	}
+});
+
+
+var simulationWorld = null;
 function drawSimulation() {
-	
+	if(simulationWorld == null) {
+		return;
+	}
+	canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+	simulationWorld.draw(ctx);
 }
+
+function handleCommandResponse(response) {
+	switch(response.type) {
+		case "grid-request": {
+			var jsonWorld = JSON.parse(response.body);
+			var world = new SimulationWorld.Builder();
+			simulationWorld = world.deserializeWorld(jsonWorld).build();
+			drawSimulation();
+			break;
+		}
+		default: break;
+	}
+}
+
 
 $(() => {
 	$(window).bind("resize", () => {
 		drawSimulation();
 	});
-
-	drawSimulation();
+	var netCmd = new Commands.GridCommand();
+	netCmd.issueRequest(ipcRenderer);
 });

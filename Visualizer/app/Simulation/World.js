@@ -35,6 +35,9 @@ class World {
                 this.settings.worldSettings.tileHeight
             )
             this.applySettings();
+            if(builder.tiles) {
+                this.tiles = builder.tiles;
+            }
         } else {
             console.error("[WORLD]: Failed to create world: No settings available!");
             delete this;
@@ -107,6 +110,15 @@ class World {
         return JSON.stringify(data);
     }
 
+    draw(ctx) {
+        var w = ctx.canvas.width / this.width;
+        var h = ctx.canvas.height / this.height;
+        for(var i = 0; i < this.tiles.length; i++) {
+            var tile = this.tiles[i];
+            tile.draw(ctx, w, h);
+        }
+    }
+
     static get Builder() {
         class Builder {
             constructor() { //Pass the settings into the constructor of the builder
@@ -141,6 +153,12 @@ class World {
 
             applyCrowdSourcerSettings(crowdSourcerSettings) {
                 this.settings.crowdSourcerSettings = crowdSourcerSettings;
+                return this;
+            }
+
+            deserializeWorld(serializedWorld) {
+                this.settings = serializedWorld.settings;
+                this.tileData = serializedWorld.tiles;
                 return this;
             }
 

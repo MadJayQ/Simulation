@@ -28,8 +28,6 @@ class PythonInterpreter {
         }
     }
 
-    
-
     onDataReceived(data) {
         console.log(data);
     }
