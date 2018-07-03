@@ -1,6 +1,6 @@
 import sys, json, time
 
-from model import solvePath
+from model import simulationTick
 
 running = True;
 
@@ -26,7 +26,13 @@ def findEnd(car, grid, size):
     return (0, 0);
 def runSimulation():
     worldJSON = json.loads(sys.argv[1]);
-    print(worldJSON["settings"]["carSettings"]);
+    timeStep = worldJSON["settings"]["timeSettings"]["timeStep"];
+    time = 0
+    maxTime = worldJSON["settings"]["timeSettings"]["maxTime"]
+    while time < maxTime:
+        simulationTick(worldJSON, time);
+        time += timeStep
+    print("done")
     sys.stdout.flush();
     running = False;
 def main():

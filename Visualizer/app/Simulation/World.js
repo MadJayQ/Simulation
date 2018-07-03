@@ -67,6 +67,42 @@ class World {
         this.crowdSourcers = [];
         this.cars = [];
         if(this.settings.tileSettings && this.settings.crowdSourcerSettings && this.settings.carSettings) {
+            for(var carIdx in this.settings.carSettings) {
+                var carSetting = this.settings.carSettings[carIdx];
+                var startPos = carSetting.startPos;
+                var endPos = carSetting.endPos;
+                var carObject = new Car(carIdx, startPos, endPos);
+                this.cars[carIdx] = carObject;
+                var spawnTileID = MathExt.coordinatesToIndex(startPos[1], startPos[0], this.width);
+                var tileSetting = this.settings.tileSettings[spawnTileID];
+                if(tileSetting == undefined) {
+                    this.settings.tileSettings[spawnTileID] = {
+                        traversable: true,
+                        crowdSourcer: undefined,
+                        carIdx: carIdx
+                    }
+                } else {
+                    tileSetting.carIdx = carIdx;
+                }
+            }
+            for(var csIdx in this.settings.crowdSourcerSettings) {
+                var csSetting = this.settings.crowdSourcerSettings[csIdx];
+                var budget = csSetting.budget;
+                var pos = csSetting.pos;
+                var cs = new CrowdSourcer(csIdx, budget);
+                this.crowdSourcers[csIdx] = cs;
+                var tileID = MathExt.coordinatesToIndex(pos[1], pos[0], this.width);
+                var tileSetting = this.settings.tileSettings[tileID];
+                if(tileSetting == undefined) {
+                    this.settings.tileSettings[tileID] = {
+                        traversable: true,
+                        crowdSourcer: csIdx,
+                        carIdx: undefined
+                    }
+                } else {
+                    tileSetting.crowdSourcer = csIdx;
+                }
+            }
             for(var tileIdx in this.settings.tileSettings ) {
                 var tId = Number(tileIdx);
                 var tile = this.tiles[tId];
@@ -75,20 +111,43 @@ class World {
                 if(setting.crowdSourcer != undefined) {
                     var cID = Number(setting.crowdSourcer);
                     var budget = this.settings.crowdSourcerSettings[cID].budget;
-                    var cs = new CrowdSourcer(cID, budget);
                     tile.attachedEnts["crowdSourcer"] = cs;
-                    this.crowdSourcers.push(cs);
                 }
                 if(setting.carIdx != undefined) {
                     var cID = Number(setting.carIdx);
-                    var startPos = this.settings.carSettings[cID].startPos;
-                    var endPos = this.settings.carSettings[cID].endPos;
-                    var c = new Car(cID, startPos, endPos);
+                    var c = this.cars[cID];
                     tile.attachedEnts["car-" + cID] = c;
-                    this.cars.push(c);
                 }
             }
         }
+        var colorSettings = this.settings.colorSettings;
+        if(colorSettings) {
+            this.applyColorSettings(colorSettings);
+        }
+    }
+
+    applyColorSettings(colorSettings) {
+        var numCs = this.crowdSourcers.length;
+        var numCars = this.cars.length;
+
+        for(var i = 0; 
+            i < Math.max(numCs, numCars);
+            i++
+        ) {
+            var cs = this.crowdSourcers[i];
+            var car = this.cars[i];
+            var csColors = this.settings.colorSettings.crowdSourcers;
+            var carColors = this.settings.colorSettings.cars;
+
+            if(cs && csColors[cs.cID]) {
+                cs.SetColor(csColors[cs.cID].color);
+            }
+
+            if(car && carColors[car.cID]) {
+                car.SetColor(carColors[car.cID].color);
+            }
+            
+        } 
     }
 
     serialize() {
@@ -117,6 +176,30 @@ class World {
             var tile = this.tiles[i];
             tile.draw(ctx, w, h);
         }
+    }
+
+    probeNeighbors() {
+        var findNeighbors = (array, x, y) => {
+            var neighbors = [];
+            var rowLimit = array.length - 1;
+            var columnLimit = array[0].length - 1;
+
+            for(var x = Math.max(0, i - 1); x <= Math.min(i + 1, rowLimit); x++) {
+                for(var y= Math.max(0, j-1); y <= Math.min(j+1, columnLimit); y++) {
+                    if(x !== i || y !== j) {
+                        if(array[i][j].attachedEnts != {}) {
+                            neighbors.push(array[i][j].attachedEnts);
+                        }
+                    }
+                }
+            }
+
+            return neighbors;
+        }
+
+        this.cars.forEach(element => {
+            
+        });
     }
 
     static get Builder() {
@@ -153,6 +236,11 @@ class World {
 
             applyCrowdSourcerSettings(crowdSourcerSettings) {
                 this.settings.crowdSourcerSettings = crowdSourcerSettings;
+                return this;
+            }
+
+            applyColorSettings(colorSettings) {
+                this.settings.colorSettings = colorSettings;
                 return this;
             }
 

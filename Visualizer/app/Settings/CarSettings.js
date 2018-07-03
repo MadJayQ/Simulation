@@ -1,7 +1,11 @@
 var Cars = {
     0: {
         startPos: [0, 0],
-        endPos: [0, 4]
+        endPos: [4, 0]
+    },
+    1: {
+        startPos: [0, 1],
+        endPos: [4, 1]
     }
 }
 

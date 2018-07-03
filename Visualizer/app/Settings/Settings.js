@@ -1,7 +1,7 @@
 var Settings = {
     worldSettings: {
-        tileWidth: 5,
-        tileHeight: 5
+        tileWidth: 13,
+        tileHeight: 9
     },
     timeSettings: {
         minTime: 0,

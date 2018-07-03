@@ -13,6 +13,7 @@ const Settings = require('./Settings/Settings.js');
 const TileSettings = require('./Settings/TileSettings.js');
 const CarSettings = require('./Settings/CarSettings.js');
 const CrowdSourcerSettings = require('./Settings/CrowdSourcerSettings.js');
+const ColorSettings = require('./Settings/ColorSettings.js');
 
 const PythonInterpreter = require('./Commands/PythonInterpreter.js');
 const CommandInterpreter = require('./Commands/CommandInterpreter.js');
@@ -33,12 +34,14 @@ class App {
                     applyTileSettings(TileSettings).
                     applyCrowdSourcerSettings(CrowdSourcerSettings).
                     applyCarSettings(CarSettings).
+                    applyColorSettings(ColorSettings).
                     build();
         this.commandInterpreter = new CommandInterpreter(ipcMain);
         this.pythonInterpreter = new PythonInterpreter('/scripts/exec.py'); //Create our executor
-        this.pythonInterpreter.startModule(this.world);
-        this.commandInterpreter.registerCommand(
-            new Commands.GridCommand(this.world)
+        this.commandInterpreter.registerCommands([
+            new Commands.GridCommand(this.world),
+            new Commands.SimulationBakeCommand(this.world, this.pythonInterpreter),
+            new Commands.RandomizeWorldCommand(this.world)]
         );
         //this.pythonInterpreter.runModule();
         /*

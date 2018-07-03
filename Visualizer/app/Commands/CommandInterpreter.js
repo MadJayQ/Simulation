@@ -10,8 +10,11 @@ class CommandInterpreter {
         this.commands = {};
     }
         
-    registerCommand(command) {
-        this.commands[command.request] = command;
+    registerCommands(commands) {
+        for(var i = 0; i < commands.length; i++) {
+            var command = commands[i];
+            this.commands[command.request] = command;
+        }
     }
 
     onAsyncMessageReceived(self, event, arg) {

@@ -2,12 +2,14 @@ var CrowdSourcers = {
     /*
         <format>
         csIdx: {
-            budget: <integer>
+            budget: <integer>,
+            pos: <vector2int>
         }
         </format>
     */
     0: {
-        budget: 1000
+        budget: 1000,
+        pos: [6, 0]
     }
 }
 

@@ -214,47 +214,76 @@ $(() => {
 const Commands = require('../app/Commands/Command.js');
 const NetMsg = require('../app/Commands/NetMsg.js');
 const SimulationWorld = require('../app/Simulation/World.js');
+const TimeScrubberModule = require('./timescrubber.js');
 
-ipcRenderer.on("asynchronous-reply", (event, arg) => {
-	var possibleCommand = new NetMsg.Verify(arg);
-	if(possibleCommand.isMessage()) {
-		switch(possibleCommand.messageObj.type) {
-			case NetMsg.Type.TYPE_COMMAND_RESPONSE: {
-				handleCommandResponse(possibleCommand.messageObj.body);
+class VisualizerApplet {
+	constructor(ipcPipe) {
+		this.ipcPipe = ipcPipe;
+		this.simulationWorld = null;
+		this.timeScrubber = new TimeScrubberModule(undefined, ipcPipe);
+	
+	}
+
+	initialize() {
+		this.ipcPipe.on("asynchronous-reply", (event, arg) => {
+			var possibleCommand = new NetMsg.Verify(arg);
+			if(possibleCommand.isMessage()) {
+				switch(possibleCommand.messageObj.type) {
+					case NetMsg.Type.TYPE_COMMAND_RESPONSE: {
+						this.handleCommandResponse(possibleCommand.messageObj.body);
+					}
+				}
+			}	
+		})
+	}
+	
+	handleCommandResponse(response) {
+		switch(response.type) {
+			case "grid-request": {
+				var jsonWorld = JSON.parse(response.body);
+				var world = new SimulationWorld.Builder();
+				this.simulationWorld = world.deserializeWorld(jsonWorld).build();
+				this.drawSimulation();
+				if(!this.timeScrubber.initialized) {
+					this.timeScrubber.initialize(this.simulationWorld.settings.timeSettings);
+					this.timeScrubber.construct();
+				}
+				break;
 			}
+			case Commands.RandomizeWorldCommand.REQ: {
+				var jsonWorld = JSON.parse(response.body);
+				var world = new SimulationWorld.Builder();
+				this.simulationWorld = world.deserializeWorld(jsonWorld).build();
+				this.drawSimulation();
+			}
+			default: break;
 		}
 	}
-});
 
-
-var simulationWorld = null;
-function drawSimulation() {
-	if(simulationWorld == null) {
-		return;
-	}
-	canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
-	simulationWorld.draw(ctx);
-}
-
-function handleCommandResponse(response) {
-	switch(response.type) {
-		case "grid-request": {
-			var jsonWorld = JSON.parse(response.body);
-			var world = new SimulationWorld.Builder();
-			simulationWorld = world.deserializeWorld(jsonWorld).build();
-			drawSimulation();
-			break;
+	drawSimulation() {
+		if(this.simulationWorld == null) {
+			return;
 		}
-		default: break;
+		canvas.width = canvas.clientWidth;
+		canvas.height = canvas.clientHeight;
+		this.simulationWorld.draw(ctx);
 	}
 }
+
+
 
 
 $(() => {
+	var app = new VisualizerApplet(ipcRenderer);
+	app.initialize();
 	$(window).bind("resize", () => {
-		drawSimulation();
+		app.drawSimulation();
 	});
 	var netCmd = new Commands.GridCommand();
 	netCmd.issueRequest(ipcRenderer);
+
+	$("#simulation-Randomize").click(() => {
+		var netCmd = new Commands.RandomizeWorldCommand();
+		netCmd.issueRequest(ipcRenderer);
+	});
 });

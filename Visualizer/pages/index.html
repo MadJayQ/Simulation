@@ -56,7 +56,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="index.html">Visualizer v1.0</a>
+                <a class="navbar-brand" href="index.html">Visualizer v1.1.2a</a>
             </div>
             <!-- /.navbar-header -->
 
@@ -418,14 +418,7 @@
                                         <span class="caret"></span>
                                     </button>
                                     <ul class="dropdown-menu pull-right" role="menu">
-                                        <li><a href="#">Action</a>
-                                        </li>
-                                        <li><a href="#">Another action</a>
-                                        </li>
-                                        <li><a href="#">Something else here</a>
-                                        </li>
-                                        <li class="divider"></li>
-                                        <li><a href="#">Separated link</a>
+                                        <li><a id="simulation-Randomize" href="#">Randomize Simulation</a>
                                         </li>
                                     </ul>
                                 </div>
@@ -456,52 +449,16 @@
                                         <div class="panel-group">
                                             <div class="panel-heading">
                                                 <h4 class="panel title">
-                                                    <a data-toggle="collapse" href="#carlocations">Car Locations</a>
+                                                    <a data-toggle="collapse" href="#worldSettings">World Settings</a>
                                                 </h4>
                                             </div>
-                                            <div id="carlocations" class="panel-collapse collapse">
-                                                <div id="car-panel" class="panel-body"></div>
+                                            <div id="worldSettings" class="panel-collapse collapse">
+                                                <div id="ws-panel" class="panel-body"></div>
                                                 <div class="panel-footer">
                                                     <div class="container-fluid">
                                                         <button id="newCarBtn" class="btn btn-default">New Car</button>
                                                         <button id="applyAllBtn" class="btn btn-default">Apply All Changes</button>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div class="panel-heading">
-                                                <h4 class="panel title">
-                                                    <a data-toggle="collapse" href="#gridsize">Grid Size</a>
-                                                </h4>
-                                            </div>
-                                            <div id="gridsize" class="panel-collapse collapse">
-                                                <div class="panel-body">      
-                                                    <div class="container-fluid">
-                                                        <form style="display: table">
-                                                            <p style="display: table-row">
-                                                                <label style="display: table-cell">Size:</label>
-                                                                <input style="display: table-cell" type="text" id="size-input"><br/>
-                                                            </p>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                                <div class="panel-footer">
-                                                    <button id="gridApplyBtn" class="btn btn-block">Apply Changes</button>
-                                                </div>
-                                            </div>
-                                            <div class ="panel-heading">
-                                                <h4 class="panel title">
-                                                    <a data-toggle="collapse" href="#CrowdSourcers">Croud Sourcers</a>
-                                                </h4>
-                                            </div>
-                                            <div id="CrowdSourcers" class="panel-collapse collapse">
-                                                <div class="panel-body">
-
-                                                </div>
-                                            </div>
-                                            <div class="panel-footer">
-                                                <div class="container-fluid">
-                                                    <button id="newCroudSrcBtn" class="btn btn-default">New Croudsourcer</button>
-                                                    <button id="apply" class="btn btn-default">Apply All Changes</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -541,6 +498,8 @@
                         <div class="panel-body">
                             <div class="container-fluid" style="padding-top: 5rem;padding-bottom: 5rem;">
                                 <div class="noUiSlider" id="time-scrubber"></div>
+                                <button class="button" id="bakeButton">Bake</button>
+                                <button class="button" id="playButton">Play</button>
                             </div>
                         </div>
                         <!-- /.panel-body -->

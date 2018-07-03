@@ -7,17 +7,17 @@ var TileSettings = {
             car: <idx>
         }
         </format>
-    */
     0: {
         traversable: true,
         crowdSourcer: undefined,
-        carIdx: 0
+        carIdx: undefined
     },
     6: {
         traversable: true,
-        crowdSourcer: 0,
+        crowdSourcer: undefined,
         carIdx: undefined
     }
+    */
 }
 
 module.exports = TileSettings;

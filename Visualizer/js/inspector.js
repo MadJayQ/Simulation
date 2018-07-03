@@ -113,6 +113,7 @@ function newCar(e) {
 
 }
 $(() => {
+    return;
     var grid = visualizer.grid.gridData;
     for(var i = 0; i < grid.length; i++) {
         var carIdx = grid[i];
