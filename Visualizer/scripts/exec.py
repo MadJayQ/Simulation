@@ -29,9 +29,7 @@ def runSimulation():
     timeStep = worldJSON["settings"]["timeSettings"]["timeStep"];
     time = 0
     maxTime = worldJSON["settings"]["timeSettings"]["maxTime"]
-    while time < maxTime:
-        simulationTick(worldJSON, time);
-        time += timeStep
+    simulationTick(worldJSON, time);
     print("done")
     sys.stdout.flush();
     running = False;

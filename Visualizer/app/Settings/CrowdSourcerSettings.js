@@ -9,7 +9,7 @@ var CrowdSourcers = {
     */
     0: {
         budget: 1000,
-        pos: [6, 0]
+        pos: [10, 3]
     }
 }
 

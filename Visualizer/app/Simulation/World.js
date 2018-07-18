@@ -60,6 +60,7 @@ class World {
                 coords[0],
                 coords[1]
             );
+            this.tiles[i].reward = MathExt.randInt(150, 250);
         }
     }
 
@@ -158,7 +159,8 @@ class World {
                 pos: t.pos,
                 tID: t.tID,
                 attachedEnts: t.attachedEnts,
-                traversable: t.traversable
+                traversable: t.traversable,
+                reward: t.reward
             } 
         }
         var data = {

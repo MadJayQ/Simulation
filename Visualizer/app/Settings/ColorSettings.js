@@ -5,16 +5,35 @@ var ColorSettings = {
     },
     crowdSourcers: {
         0: {
-            color: "blue"
+            color: "green"
         }
     },
     cars: {
         0: {
-            color: "green"
+            color: "red"
         },
         1: {
             color: "red"
+        },
+        2: {
+            color: "red"
+        },
+        3: {
+            color: "green"
+        },
+        4: {
+            color: "red"
+        },
+        5: {
+            color: "red"
+        },
+        6: {
+            color: "red"
+        },
+        7: {
+            color: "red"
         }
+
     }
 }
 
