@@ -30,14 +30,14 @@ class World {
         */ 
         this.settings = (builder.settings != undefined) ? builder.settings : this.defaultSettings;
         if(this.settings != undefined) {
+            if(builder.tileData !== undefined) {
+                this.tileData = builder.tileData;
+            }
             this.constructTiles(
                 this.settings.worldSettings.tileWidth,
                 this.settings.worldSettings.tileHeight
             )
             this.applySettings();
-            if(builder.tiles) {
-                this.tiles = builder.tiles;
-            }
         } else {
             console.error("[WORLD]: Failed to create world: No settings available!");
             delete this;
@@ -55,12 +55,50 @@ class World {
         var numTiles = width * height;
         for(var i = 0; i < numTiles; i++) {
             var coords = MathExt.indexToCoordinates(i, width);
-            this.tiles[i] = new Tile.Tile(
-                i,
-                coords[0],
-                coords[1]
-            );
-            this.tiles[i].reward = MathExt.randInt(150, 250);
+            if(this.tileData !== undefined && this.tileData[i] !== undefined) {
+                var tileData = this.tileData[i];
+                this.tiles[i] = new Tile.Tile(
+                    i,
+                    coords[0],
+                    coords[1]
+                );
+                if(i == 71) {
+                    var tt = Object.keys(tileData.attachedEnts);
+                    console.log("STOP!");
+                }
+                this.tiles[i].reward = tileData.reward;
+                this.tiles[i].cost = tileData.cost;
+                var entKeys = Object.keys(tileData.attachedEnts);
+                for(var j = 0; j < entKeys.length; j++) {
+                    var entKey = entKeys[j];
+                    var cID = tileData.attachedEnts[entKey]["cID"];
+                    var startPos = tileData.attachedEnts[entKey]["startPos"];
+                    var endPos = tileData.attachedEnts[entKey]["endPos"];                    this.tiles[i].attachedEnts[entKey] = new Car(cID, startPos, endPos);
+                }
+            } else {
+                this.tiles[i] = new Tile.Tile(
+                    i,
+                    coords[0],
+                    coords[1]
+                );
+                this.tiles[i].reward = MathExt.randInt(150, 250);
+                this.tiles[i].cost = Math.random();
+            }
+        }
+    }
+    
+    executeMove(moveData) {
+        moveData = JSON.parse(moveData);
+        console.log("MOVE DATA!");
+        for (var move in moveData) {
+            var newTile = this.tiles[parseInt(moveData[move]["new"])];
+            var previousTile = this.tiles[parseInt(moveData[move]["previous"])];
+            var car = previousTile.attachedEnts[move];
+            var newCapacity = parseInt(moveData[move]["newCapacity"]);
+            delete previousTile.attachedEnts[move];
+            var newCoords = MathExt.indexToCoordinates(parseInt(moveData[move]["new"]), this.width);
+            newTile.attachedEnts[move] = new Car(car["cID"], newCoords, car["endPos"]);
+            newTile.attachedEnts[move].capacity = newCapacity;
         }
     }
 
@@ -160,7 +198,8 @@ class World {
                 tID: t.tID,
                 attachedEnts: t.attachedEnts,
                 traversable: t.traversable,
-                reward: t.reward
+                reward: t.reward,
+                cost: t.cost
             } 
         }
         var data = {
@@ -174,34 +213,17 @@ class World {
     draw(ctx) {
         var w = ctx.canvas.width / this.width;
         var h = ctx.canvas.height / this.height;
-        for(var i = 0; i < this.tiles.length; i++) {
-            var tile = this.tiles[i];
+        var size = this.tiles.length || Object.keys(this.tiles).length;
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'black';
+        ctx.beginPath();
+        ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.fill();
+        ctx.stroke();
+        for(var i = 0; i < size; i++) {
+            var tile = this.tiles[i] || this.tiles[toString(i)];
             tile.draw(ctx, w, h);
         }
-    }
-
-    probeNeighbors() {
-        var findNeighbors = (array, x, y) => {
-            var neighbors = [];
-            var rowLimit = array.length - 1;
-            var columnLimit = array[0].length - 1;
-
-            for(var x = Math.max(0, i - 1); x <= Math.min(i + 1, rowLimit); x++) {
-                for(var y= Math.max(0, j-1); y <= Math.min(j+1, columnLimit); y++) {
-                    if(x !== i || y !== j) {
-                        if(array[i][j].attachedEnts != {}) {
-                            neighbors.push(array[i][j].attachedEnts);
-                        }
-                    }
-                }
-            }
-
-            return neighbors;
-        }
-
-        this.cars.forEach(element => {
-            
-        });
     }
 
     static get Builder() {

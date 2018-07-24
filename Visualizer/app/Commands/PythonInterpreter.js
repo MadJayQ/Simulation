@@ -1,8 +1,14 @@
 const PythonShell = require('python-shell');
-
+var finishCallback = undefined;
 class PythonInterpreter {
     constructor(executor) {
         this.executor = executor;
+        this.simulating = false;
+    }
+
+    notifyOnFinish(callback, caller) {
+        finishCallback = callback;
+        finishCallback = finishCallback.bind(caller);
     }
     
     startModule(world) {
@@ -15,7 +21,6 @@ class PythonInterpreter {
                 args: [serializedWorld, world.width, world.height]
             }
         );
-
         this.shell.stdout.on(
            'data', 
            this.onDataReceived
@@ -29,7 +34,13 @@ class PythonInterpreter {
     }
 
     onDataReceived(data) {
+        var doneIdx = data.indexOf("done");
+        if(doneIdx != -1) {
+            finishCallback(data.slice(doneIdx + 5));
+        } else {
+        }
         console.log(data);
+
     }
 }
 

@@ -49,18 +49,26 @@ class SimulationBakeCommand extends Command {
         super("bake-simulation", () => {this.execute});
         this.world = world;
         this.interpreter = interpreter;
+        this.activePipe = undefined;
+    }
+
+    finishSimulation(moveData) {
+        var netMsg = new NetMsg(NetMsg.Type.TYPE_COMMAND_RESPONSE);
+        this.world.executeMove(moveData);
+        var newWorld = this.world.serialize();
+        this.activePipe.sender.send("asynchronous-reply", netMsg.serialize(
+            {
+                type: SimulationBakeCommand.REQ,
+                body: newWorld
+            }
+        ));
     }
 
     execute(pipe) {
         this.interpreter.startModule(this.world);
         this.interpreter.runModule();
-        var netMsg = new NetMsg(NetMsg.Type.TYPE_COMMAND_RESPONSE);
-        pipe.sender.send("asynchronous-reply", netMsg.serialize(
-            {
-                type: SimulationBakeCommand.REQ,
-                body: ""
-            }
-        ));
+        this.interpreter.notifyOnFinish(this.finishSimulation, this);
+        this.activePipe = pipe;
     }
 
     static get REQ() {

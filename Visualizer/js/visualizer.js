@@ -250,11 +250,13 @@ class VisualizerApplet {
 				}
 				break;
 			}
+			case Commands.SimulationBakeCommand.REQ:
 			case Commands.RandomizeWorldCommand.REQ: {
 				var jsonWorld = JSON.parse(response.body);
 				var world = new SimulationWorld.Builder();
 				this.simulationWorld = world.deserializeWorld(jsonWorld).build();
 				this.drawSimulation();
+				break;
 			}
 			default: break;
 		}

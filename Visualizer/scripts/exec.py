@@ -29,17 +29,19 @@ def runSimulation():
     timeStep = worldJSON["settings"]["timeSettings"]["timeStep"];
     time = 0
     maxTime = worldJSON["settings"]["timeSettings"]["maxTime"]
-    simulationTick(worldJSON, time);
+    res = simulationTick(worldJSON, time);
     print("done")
-    sys.stdout.flush();
     running = False;
+    return res;
 def main():
     while running:
         command = sys.stdin.readline().split('\n')[0];
-        sys.stdout.write(command);
-        sys.stdout.flush();
         if command == "start":
-            runSimulation()
+            sys.stdout.flush();
+            newWorld = runSimulation();
+            sys.stdout.flush();
+            print(newWorld);
+            sys.stdout.flush();
         time.sleep(0.1);
         
 

@@ -1,3 +1,4 @@
+const MathExt = require('../math.js');
 class Car {
     constructor(cID, startPos, endPos) {
         this.cID = cID;
@@ -5,6 +6,7 @@ class Car {
         this.endPos = endPos;
         this.color = "white";
         this.neighbors = [];
+        this.capacity = MathExt.randInt(500, 1500);
     }
 
     SetColor(color) {
