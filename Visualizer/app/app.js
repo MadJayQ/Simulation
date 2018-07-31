@@ -41,38 +41,15 @@ class App {
         this.commandInterpreter.registerCommands([
             new Commands.GridCommand(this.world),
             new Commands.SimulationBakeCommand(this.world, this.pythonInterpreter),
-            new Commands.RandomizeWorldCommand(this.world)]
+            new Commands.MaximumTimeSensingCommand(this.world, this.pythonInterpreter),
+            new Commands.RandomizeWorldCommand(this.world),
+            new Commands.SettingsCommand(this.world, undefined),
+            new Commands.CarsCommand(this.world)]
         );
         return true;
     }
-    buildPaths(event) {
-        var merged = [].concat.apply([], this.grid.grid);
-        //console.log(merged);
-        if(this.pyshell) {
-            this.pyshell.terminate();
-            this.pyshell = null;
-        }
-        this.waiting = true;
-        this.pyshell = new python('/scripts/exec.py', {pythonOptions: ['-B'], args: [merged, this.grid.size, this.grid.numCars]});
-        this.pyshell.stdout.on('data', (data) => {
-            try {
-                var dat = JSON.parse(data);
-                for(var i = 1; i <= this.grid.numCars; i++) {
-                    this.paths[i - 1] = dat[i]["path"];
-                    this.ends[i - 1] = dat[i]["end"];
-                    console.log(dat[i]["path"]);
-                }
-                if(event !== undefined) {
-                    event.returnValue = 0;
-                }
-            } catch(err) {
-                console.log("NOT JSON: " + data + ":" + err);
-            }
-        });
-        this.pyshell.send('start').end();
-    }
     exec() {
-
+        this.commandInterpreter.onCommand(Commands.MaximumTimeSensingCommand.REQ, false);
     }
 }
 

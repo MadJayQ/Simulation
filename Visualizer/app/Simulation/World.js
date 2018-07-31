@@ -73,7 +73,8 @@ class World {
                     var entKey = entKeys[j];
                     var cID = tileData.attachedEnts[entKey]["cID"];
                     var startPos = tileData.attachedEnts[entKey]["startPos"];
-                    var endPos = tileData.attachedEnts[entKey]["endPos"];                    this.tiles[i].attachedEnts[entKey] = new Car(cID, startPos, endPos);
+                    var endPos = tileData.attachedEnts[entKey]["endPos"];                    
+                    this.tiles[i].attachedEnts[entKey] = new Car(cID, startPos, endPos);
                 }
             } else {
                 this.tiles[i] = new Tile.Tile(
@@ -81,8 +82,8 @@ class World {
                     coords[0],
                     coords[1]
                 );
-                this.tiles[i].reward = MathExt.randInt(150, 250);
-                this.tiles[i].cost = Math.random();
+                this.tiles[i].reward = MathExt.randInt(this.settings.worldSettings.minReward, this.settings.worldSettings.maxReward);
+                this.tiles[i].cost = MathExt.randNum(this.settings.worldSettings.minCost, this.settings.worldSettings.maxCost);
             }
         }
     }
@@ -94,11 +95,26 @@ class World {
             var newTile = this.tiles[parseInt(moveData[move]["new"])];
             var previousTile = this.tiles[parseInt(moveData[move]["previous"])];
             var car = previousTile.attachedEnts[move];
-            var newCapacity = parseInt(moveData[move]["newCapacity"]);
-            delete previousTile.attachedEnts[move];
-            var newCoords = MathExt.indexToCoordinates(parseInt(moveData[move]["new"]), this.width);
-            newTile.attachedEnts[move] = new Car(car["cID"], newCoords, car["endPos"]);
-            newTile.attachedEnts[move].capacity = newCapacity;
+            if(car !== undefined) {
+                var newCapacity = parseInt(moveData[move]["newCapacity"]);
+                delete previousTile.attachedEnts[move];
+                var newCoords = MathExt.indexToCoordinates(parseInt(moveData[move]["new"]), this.width);
+                var cID = car["cID"];
+                newTile.attachedEnts[move] = new Car(car["cID"], newCoords, car["endPos"]);
+                this.cars[Number(cID)] = newTile.attachedEnts[move];
+                newTile.attachedEnts[move].capacity = newCapacity;
+                newTile.justUpdated = true;
+                previousTile.justUpdated = true;
+            }
+        }
+    }
+
+    setCarCapacity(maxTS) {
+        for(var i = 0; i < this.cars.length; i++) {
+            var car = this.cars[i];
+            if(car !== undefined) {
+                car.capacity = MathExt.randInt(this.settings.worldSettings.minCapacity, this.settings.worldSettings.maxCapacity) * maxTS;
+            }
         }
     }
 
@@ -113,50 +129,7 @@ class World {
                 var carObject = new Car(carIdx, startPos, endPos);
                 this.cars[carIdx] = carObject;
                 var spawnTileID = MathExt.coordinatesToIndex(startPos[1], startPos[0], this.width);
-                var tileSetting = this.settings.tileSettings[spawnTileID];
-                if(tileSetting == undefined) {
-                    this.settings.tileSettings[spawnTileID] = {
-                        traversable: true,
-                        crowdSourcer: undefined,
-                        carIdx: carIdx
-                    }
-                } else {
-                    tileSetting.carIdx = carIdx;
-                }
-            }
-            for(var csIdx in this.settings.crowdSourcerSettings) {
-                var csSetting = this.settings.crowdSourcerSettings[csIdx];
-                var budget = csSetting.budget;
-                var pos = csSetting.pos;
-                var cs = new CrowdSourcer(csIdx, budget);
-                this.crowdSourcers[csIdx] = cs;
-                var tileID = MathExt.coordinatesToIndex(pos[1], pos[0], this.width);
-                var tileSetting = this.settings.tileSettings[tileID];
-                if(tileSetting == undefined) {
-                    this.settings.tileSettings[tileID] = {
-                        traversable: true,
-                        crowdSourcer: csIdx,
-                        carIdx: undefined
-                    }
-                } else {
-                    tileSetting.crowdSourcer = csIdx;
-                }
-            }
-            for(var tileIdx in this.settings.tileSettings ) {
-                var tId = Number(tileIdx);
-                var tile = this.tiles[tId];
-                var setting = this.settings.tileSettings[tId];
-                tile.traversable = setting.traversable;
-                if(setting.crowdSourcer != undefined) {
-                    var cID = Number(setting.crowdSourcer);
-                    var budget = this.settings.crowdSourcerSettings[cID].budget;
-                    tile.attachedEnts["crowdSourcer"] = cs;
-                }
-                if(setting.carIdx != undefined) {
-                    var cID = Number(setting.carIdx);
-                    var c = this.cars[cID];
-                    tile.attachedEnts["car-" + cID] = c;
-                }
+                this.tiles[spawnTileID].attachedEnts["car-" + carIdx] = carObject;
             }
         }
         var colorSettings = this.settings.colorSettings;
@@ -166,6 +139,7 @@ class World {
     }
 
     applyColorSettings(colorSettings) {
+        return;
         var numCs = this.crowdSourcers.length;
         var numCars = this.cars.length;
 
@@ -189,8 +163,22 @@ class World {
         } 
     }
 
+    serializeCars() {
+        var carData = {};
+        for(var i = 0; i < this.cars.length; i++) {
+            var car = this.cars[i];
+            if(car !== undefined) {
+                carData[i] = {
+                    startPos: car.startPos,
+                    endPos: car.endPos,
+                    capacity: car.capacity
+                }
+            }
+        }
+        return JSON.stringify(carData);
+    }
     serialize() {
-        var tileData = {};
+    var tileData = {};
         for(var i = 0; i < this.tiles.length; i++) {
             var t = this.tiles[i];
             tileData[i] = {

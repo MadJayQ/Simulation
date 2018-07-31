@@ -453,11 +453,66 @@
                                                 </h4>
                                             </div>
                                             <div id="worldSettings" class="panel-collapse collapse">
-                                                <div id="ws-panel" class="panel-body"></div>
+                                                <div id="ws-panel" class="panel-body">
+                                                    <div class="container-fluid">
+                                                        <h4>
+                                                            World Size
+                                                        </h4>
+                                                        <p style="display: table-row">
+                                                            <label style="display: table-cell">Width: </label>
+                                                            <input style="display: table-cell" id="width-input" type="text"></input>
+                                                            <label style="display: table-cell">Height: </label>
+                                                            <input style="display: table-cell" id="height-input" type="text"></input>
+                                                        </p>
+                                                        <h4>
+                                                            Car Parameters
+                                                        </h4>
+                                                        <h5>
+                                                            Num Cars
+                                                        </h5>
+                                                        <p style="display: table-row">
+                                                            <label style="display: table-cell">Min: </label>
+                                                            <input style="display: table-cell" id="min-cars-input" type="text"></input>
+                                                            <label style="display: table-cell">Max: </label>
+                                                            <input style="display: table-cell" id="max-cars-input" type="text"></input>
+                                                        </p>
+                                                        <h5>
+                                                            Capacity Multiplier
+                                                        </h5>
+                                                        <p style="display: table-row">
+                                                            <label style="display: table-cell">Min: </label>
+                                                            <input style="display: table-cell" id="min-capacity-input" type="text"></input>
+                                                            <label style="display: table-cell">Max: </label>
+                                                            <input style="display: table-cell" id="max-capacity-input" type="text"></input>
+                                                        </p>
+                                                        <h4>
+                                                            Car Parameters
+                                                        </h4>
+                                                        <h5>
+                                                            Cell Cost
+                                                        </h5>
+                                                        <p style="display: table-row">
+                                                            <label style="display: table-cell">Min: </label>
+                                                            <input style="display: table-cell" id="min-cost-input" type="text"></input>
+                                                            <label style="display: table-cell">Max: </label>
+                                                            <input style="display: table-cell" id="max-cost-input" type="text"></input>
+                                                        </p>
+                                                    </div>
+                                                </div>
                                                 <div class="panel-footer">
                                                     <div class="container-fluid">
-                                                        <button id="newCarBtn" class="btn btn-default">New Car</button>
                                                         <button id="applyAllBtn" class="btn btn-default">Apply All Changes</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="panel-heading">
+                                                <h4 class="panel title">
+                                                    <a data-toggle="collapse" href="#cars">Cars</a>
+                                                </h4>
+                                            </div>
+                                            <div id="cars" class="panel-collapse collapse">
+                                                <div id="cs-panel" class="panel-body">
+                                                    <div class="container-fluid" id="cars-panel">
                                                     </div>
                                                 </div>
                                             </div>

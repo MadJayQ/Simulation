@@ -4,6 +4,10 @@ module.exports.randInt = (min, max) => {
     return Math.round(Math.random() * (max - min) + min);
 }
 
+module.exports.randNum = (min, max) => {
+    return Math.random() * (max - min) + min;
+}
+
 module.exports.indexToCoordinates = (idx, width) => {
     var row = Math.floor(idx / width);
     var col = idx % width;

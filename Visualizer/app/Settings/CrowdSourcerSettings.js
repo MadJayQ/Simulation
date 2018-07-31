@@ -7,10 +7,6 @@ var CrowdSourcers = {
         }
         </format>
     */
-    0: {
-        budget: 1000,
-        pos: [10, 3]
-    }
 }
 
 module.exports = CrowdSourcers;

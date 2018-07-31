@@ -1,7 +1,15 @@
 var Settings = {
     worldSettings: {
         tileWidth: 13,
-        tileHeight: 9
+        tileHeight: 9,
+        minCars: 15,
+        maxCars: 30,
+        minReward: 150,
+        maxReward: 250,
+        minCost: 0.1,
+        maxCost: 0.9,
+        minCapacity: 1,
+        maxCapacity: 10
     },
     timeSettings: {
         minTime: 0,

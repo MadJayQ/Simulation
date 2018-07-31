@@ -1,29 +1,8 @@
 import sys, json, time
 
 from model import simulationTick
+from model import calculateMaximumTimeSensing
 
-running = True;
-
-def chunkify(seq, num):
-    avg = len(seq) / float(num)
-    out = []
-    last = 0.0
-    while last < len(seq):
-        out.append(seq[int(last):int(last + avg)])
-        last += avg
-    return out
-def findStart(car, grid, size):
-    for i in range(0, size):
-        for j in range(0, size):
-            if grid[i][j] == car:
-                return (i, j);
-    return (0, 0);
-def findEnd(car, grid, size):
-    for i in range(0, size):
-        for j in range(0, size):
-            if grid[i][j] == -car:
-                return (i, j);
-    return (0, 0);
 def runSimulation():
     worldJSON = json.loads(sys.argv[1]);
     timeStep = worldJSON["settings"]["timeSettings"]["timeStep"];
@@ -34,13 +13,23 @@ def runSimulation():
     running = False;
     return res;
 def main():
+    running = True;
     while running:
         command = sys.stdin.readline().split('\n')[0];
         if command == "start":
             sys.stdout.flush();
             newWorld = runSimulation();
+            running = False;
             sys.stdout.flush();
             print(newWorld);
+            sys.stdout.flush();
+        if command == "max-ts":
+            sys.stdout.flush();
+            worldJSON = json.loads(sys.argv[1]);
+            maxTS = calculateMaximumTimeSensing(worldJSON);
+            print("done");
+            print(maxTS);
+            running = False;
             sys.stdout.flush();
         time.sleep(0.1);
         

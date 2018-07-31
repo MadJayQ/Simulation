@@ -215,6 +215,8 @@ const Commands = require('../app/Commands/Command.js');
 const NetMsg = require('../app/Commands/NetMsg.js');
 const SimulationWorld = require('../app/Simulation/World.js');
 const TimeScrubberModule = require('./timescrubber.js');
+const Inspector = require('./inspector.js');
+const MathExt = require('../app/math.js');
 
 class VisualizerApplet {
 	constructor(ipcPipe) {
@@ -236,6 +238,30 @@ class VisualizerApplet {
 			}	
 		})
 	}
+
+	onCarHover(carPanel) {
+		var carIdx = Number(carPanel[1].id.split("-")[1]);
+		if(carIdx != NaN) {
+			var car = this.simulationWorld.cars[carIdx];
+			var startIdx = MathExt.coordinatesToIndex(car.startPos[1], car.startPos[0], this.simulationWorld.width);
+			var endIdx = MathExt.coordinatesToIndex(car.endPos[1], car.endPos[0], this.simulationWorld.width);
+			this.simulationWorld.tiles[startIdx].color = 'green';
+			this.simulationWorld.tiles[endIdx].color = 'red';
+			this.drawSimulation();
+		}
+	}
+
+	onCarHoverLeave(carPanel) {
+		var carIdx = Number(carPanel[1].id.split("-")[1]);
+		if(carIdx != NaN) {
+			var car = this.simulationWorld.cars[carIdx];
+			var startIdx = MathExt.coordinatesToIndex(car.startPos[1], car.startPos[0], this.simulationWorld.width);
+			var endIdx = MathExt.coordinatesToIndex(car.endPos[1], car.endPos[0], this.simulationWorld.width);
+			this.simulationWorld.tiles[startIdx].color = 'white';
+			this.simulationWorld.tiles[endIdx].color = 'white';
+			this.drawSimulation();
+		}
+	}
 	
 	handleCommandResponse(response) {
 		switch(response.type) {
@@ -250,11 +276,25 @@ class VisualizerApplet {
 				}
 				break;
 			}
-			case Commands.SimulationBakeCommand.REQ:
+			case Commands.SimulationBakeCommand.REQ: {
+				this.simulationWorld.executeMove(response.body);
+				Inspector.requestCarUpdate();
+				this.drawSimulation();
+				break;
+			}
+			case Commands.SettingsCommand.REQ: {
+				Inspector.setDefaults(response.body);
+				break;
+			}
+			case Commands.CarsCommand.REQ: {
+				Inspector.populateCars(response.body);
+				break;
+			}
 			case Commands.RandomizeWorldCommand.REQ: {
 				var jsonWorld = JSON.parse(response.body);
 				var world = new SimulationWorld.Builder();
 				this.simulationWorld = world.deserializeWorld(jsonWorld).build();
+				Inspector.requestCarUpdate();
 				this.drawSimulation();
 				break;
 			}
@@ -278,6 +318,7 @@ class VisualizerApplet {
 $(() => {
 	var app = new VisualizerApplet(ipcRenderer);
 	app.initialize();
+	module.exports.app = app;
 	$(window).bind("resize", () => {
 		app.drawSimulation();
 	});

@@ -4,10 +4,12 @@ class Tile {
         this.tID = tID;
         this.attachedEnts = {};
         this.traversable = true;
+        this.justUpdated = false;
+        this.color = 'white';
     }
         
     draw(ctx, width, height) {
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = this.color;
         ctx.strokeStyle = 'black';
         ctx.beginPath();
         var x = this.pos[1] * width;
@@ -15,21 +17,19 @@ class Tile {
         ctx.rect(x, y, width, height);
         ctx.fill();
         ctx.stroke();
-        for(var entId in this.attachedEnts) {
-            var ent = this.attachedEnts[entId];
-            ent.draw(ctx, x, y, width, height);
+        ctx.fillStyle = (this.justUpdated) ? 'red' : 'black';
+        this.justUpdated = false;
+        var fontSize = 150;
+        var numEnts = Object.keys(this.attachedEnts).length.toString();
+        ctx.font = fontSize.toString() + "px Times New Roman";
+        var textSize = ctx.measureText(numEnts);
+        while(textSize.width > (width * 0.2)) {
+            fontSize -= 1;
+            ctx.font = fontSize.toString() + "px Times New Roman";
+            textSize = ctx.measureText(numEnts);
         }
-        if(!this.traversable) {
-            var x0 = this.pos[1] * width;
-            var x1 = x0 + width;
-            var y0 = this.pos[0] * height;
-            var y1 = y0 + height;
-            ctx.beginPath();
-            ctx.moveTo(x0, y0);
-            ctx.strokeStyle = "red";
-            ctx.lineTo(x1, y1);
-            ctx.stroke();
-        }
+        ctx.fillText(numEnts, x + (textSize.width / 2), y + (textSize.width * 1.3));
+
     }
 }
 

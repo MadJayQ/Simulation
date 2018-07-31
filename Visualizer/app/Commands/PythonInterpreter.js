@@ -27,9 +27,9 @@ class PythonInterpreter {
         );
     }
 
-    runModule() {
+    runModule(command) {
         if(this.shell) {
-            this.shell.send("start");
+            this.shell.send(command);
         }
     }
 
@@ -38,8 +38,8 @@ class PythonInterpreter {
         if(doneIdx != -1) {
             finishCallback(data.slice(doneIdx + 5));
         } else {
+            console.log(data);
         }
-        console.log(data);
 
     }
 }

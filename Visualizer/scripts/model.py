@@ -8,7 +8,7 @@ import json
 
 paths = [];
 skipSelf = False;
-def calculateTimeSensing(world, targetCell, currentCar):
+def calculateTimeSensing(world, targetCell):
     width = world["settings"]["worldSettings"]["tileWidth"];
     height = world["settings"]["worldSettings"]["tileHeight"];
     tile = world["tiles"][str(targetCell)];
@@ -26,6 +26,14 @@ def calculateTimeSensing(world, targetCell, currentCar):
     timeSensingPlan = float(predictedReward / totalCost) * (1.0 / float(numParticipants));
     #print(timeSensingPlan);
     return timeSensingPlan;
+def calculateMaximumTimeSensing(world):
+    tiles = world["tiles"];
+    maxTS = -99999;
+    for tileIdx in tiles:
+        ts = calculateTimeSensing(world, tileIdx);
+        if(ts > maxTS):
+            maxTS = ts;
+    return maxTS;
 def calculateExpectedUtility(world, targetCell, currentCar):
     width = world["settings"]["worldSettings"]["tileWidth"];
     height = world["settings"]["worldSettings"]["tileHeight"];
@@ -70,93 +78,95 @@ def simulationTick(world, timestamp):
     tiles = world["tiles"];
     width = int(world["settings"]["worldSettings"]["tileWidth"]);
     height = int(world["settings"]["worldSettings"]["tileHeight"]);
+    #Calculate the cost of the cell by taking the maximum time sensing plan across the whole game, and then multiplying it by an arbitrary value.
     moves = {};
     for tileIdx in tiles:
         tile = world["tiles"][tileIdx];
         attachedEnts = tile["attachedEnts"];
         if len(attachedEnts) > 0:
             tilePos = indexToCoordinates(tileIdx, width);
-            currentCar = list(attachedEnts)[0];
-            if currentCar == 'car-3':
-                carObj = attachedEnts[currentCar];
-                start = carObj["startPos"];
-                finish = carObj["endPos"];
-                adjacentCells = getNeighboringCells(tilePos[0], tilePos[1], width, height);
-                evs = [];
-                shortestPathes = [];
-                coords = [];
-                timeSensingPlans = [];
-                capacity = carObj["capacity"];
-                for i in range(0, len(adjacentCells)):
-                    adjacentCell = adjacentCells[i];
-                    evs.append(calculateExpectedUtility(world, adjacentCell, currentCar));
-                    timeSensingPlans.append(calculateTimeSensing(world, adjacentCell, currentCar));
-                    coords.append(indexToCoordinates(adjacentCell, width));
-                    shortestPathes.append(findShortestPath(coords[i], finish, width, height));
-                print("BEFORE PRUNTING========");
-                print(evs);
-                print(timeSensingPlans);
-                print(coords);
-                print(shortestPathes);
-                print("==============");
-                smallestPath = 99999;
-                toDelete = [];
-                for i in range(0, len(timeSensingPlans)):
-                    if timeSensingPlans[i] > capacity:
-                        toDelete.append(i);
-                for i in range(0, len(toDelete)):
-                    evs.pop(toDelete[i]);
-                    timeSensingPlans.pop(toDelete[i]);
-                    coords.pop(toDelete[i]);
-                    shortestPathes.pop(toDelete[i]);
-                for i in range(0, len(shortestPathes)):
-                    shortestPath = shortestPathes[i];
-                    if shortestPath < smallestPath:
-                        smallestPath = shortestPath
-                toDelete = [];
-                for i in range(0, len(shortestPathes)):
-                    if shortestPathes[i] != smallestPath:
-                        toDelete.append(i);
-                toDelete = sorted(toDelete, key=int, reverse=True); 
-                for i in range(0, len(toDelete)):
-                    evs.pop(toDelete[i]);
-                    timeSensingPlans.pop(toDelete[i]);
-                    coords.pop(toDelete[i]);
-                    shortestPathes.pop(toDelete[i]);
-                largestUtility = -9999;
-                for i in range(0, len(evs)):
-                    expectedUtility = evs[i];
-                    if expectedUtility > largestUtility:
-                        largestUtility = expectedUtility;
-                toDelete = [];
-                for i in range(0, len(evs)):
-                    if evs[i] != largestUtility:
-                        toDelete.append(i);
-                toDelete = sorted(toDelete, key=int, reverse=True);
-                for i in range(0, len(toDelete)):
-                    timeSensingPlans.pop(toDelete[i]);
-                    coords.pop(toDelete[i]);
-                    shortestPathes.pop(toDelete[i]);
-                    evs.pop(toDelete[i]);
-                print(evs);
-                print(timeSensingPlans);
-                print(coords);
-                print(shortestPathes);
-                idx = 0;
-                if len(coords) > 1:
-                    idx = random.randint(0, len(coords));
-                newLocation = coords[idx];
-                newCapacity = capacity - timeSensingPlans[idx];
-                print(newLocation);
-                newIdx = coordinatesToIndex(newLocation[0], newLocation[1], width);
-                if currentCar in world["tiles"][tileIdx]["attachedEnts"]: del world["tiles"][tileIdx]["attachedEnts"][currentCar];
-                world["tiles"][str(newIdx)]["attachedEnts"][currentCar] = carObj;
-                print(world["tiles"][str(newIdx)]["attachedEnts"]);
-                moves[currentCar] = {
-                    'previous': tileIdx,
-                    'new': newIdx,
-                    'newCapacity': newCapacity
-                };
+            for currentCar in list(attachedEnts):
+                if currentCar != '':
+                    carObj = attachedEnts[currentCar];
+                    start = carObj["startPos"];
+                    finish = carObj["endPos"];
+                    if start[0] == finish[0] and start[1] == finish[1]:
+                        continue;
+                    adjacentCells = getNeighboringCells(tilePos[0], tilePos[1], width, height);
+                    evs = [];
+                    shortestPathes = [];
+                    coords = [];
+                    timeSensingPlans = [];
+                    capacity = carObj["capacity"];
+                    for i in range(0, len(adjacentCells)):
+                        adjacentCell = adjacentCells[i];
+                        evs.append(calculateExpectedUtility(world, adjacentCell, currentCar));
+                        timeSensingPlans.append(calculateTimeSensing(world, adjacentCell));
+                        coords.append(indexToCoordinates(adjacentCell, width));
+                        shortestPathes.append(findShortestPath(coords[i], finish, width, height));
+                    print("BEFORE PRUNTING========");
+                    print(evs);
+                    print(timeSensingPlans);
+                    print(coords);
+                    print(shortestPathes);
+                    print("==============");
+                    availableTiles = [];
+                    newIdx = -1;
+                    newCapacity = capacity;
+                    for i in range(0, len(timeSensingPlans)): #Determine which of our adjacent cells we can ever possibly traverse to.
+                        timeSensingPlan = timeSensingPlans[i];
+                        if(capacity > timeSensingPlan):
+                            availableTiles.append(i);
+                    if len(availableTiles) > 0:
+                        #Pick tile with greatest utility
+                        largestUtility = -999999;
+                        largestUtilityIdx = [-1];
+                        for i in range(0, len(evs)):
+                            ev = evs[i];
+                            if abs(ev - largestUtility) < 1e-13:
+                                largestUtilityIdx.append(i);
+                            if ev > largestUtility:
+                                largestUtility = ev;
+                                largestUtilityIdx = [i];
+                        if len(largestUtilityIdx) > 1: #Multiple tiles with similar Utility? Choose shortest path
+                            shortestPath = 9999999;
+                            shortestPathIdx = [-1];
+                            for i in range(0, len(largestUtilityIdx)):
+                                if abs(shortestPathes[largestUtilityIdx[i]] - shortestPath) < 1e-13:
+                                    shortestPathIdx.append(largestUtilityIdx[i]);
+                                if shortestPathes[largestUtilityIdx[i]] < shortestPath:
+                                    shortestPath = shortestPathes[largestUtilityIdx[i]];
+                                    shortestPathIdx = [largestUtilityIdx[i]];
+                            if len(shortestPathIdx) > 1:
+                                #Return random point at this point...
+                                newInternalIdx = random.randint(0, len(shortestPathIdx) - 1);
+                                newIdx = shortestPathIdx[newInternalIdx];
+                            else:
+                                newIdx = shortestPathIdx[0];
+                        else:
+                            newIdx = largestUtilityIdx[0]; 
+                        newCapacity -= timeSensingPlans[newIdx];
+                    else:
+                        #Pick tile with shortest path
+                        shortestPath = 9999999;
+                        shortestPathIdx = [-1];
+                        for i in range(0, len(shortestPathes)):
+                            if abs(shortestPathes[i] - shortestPath) < 1e-13:
+                                shortestPathIdx.append(i);
+                            if shortestPathes[i] < shortestPath:
+                                shortestPath = shortestPathes[i];
+                                shortestPathIdx = [i];
+                        if len(shortestPathIdx) > 1:
+                            #Return random point
+                            newInternalIdx = random.randint(0, len(shortestPathIdx) - 1);
+                            newIdx = shortestPathIdx[newInternalIdx];
+                        else:
+                            newIdx = shortestPathIdx[0];
+                    moves[currentCar] = {
+                        'previous': tileIdx,
+                        'new': adjacentCells[newIdx],
+                        'newCapacity': newCapacity
+                    };
     return json.dumps(moves);
 
                 

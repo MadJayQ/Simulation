@@ -22,9 +22,10 @@ class CommandInterpreter {
         self.pipe.sender = event.sender;
         if(possibleCommand.isMessage()) {
             var msg = possibleCommand.messageObj;
+            var bodyData = msg.body.split(";");
             switch(msg.type) {
                 case NetMsg.Type.TYPE_COMMAND: {
-                    self.onCommand(msg.body);
+                    self.onCommand(bodyData[0], true, bodyData[1]);
                     break;
                 }
                 default: break;
@@ -32,11 +33,17 @@ class CommandInterpreter {
         }
     }
 
-    onCommand(commandName) {
+    onCommand(commandName, usePipe, payload) {
         var command = this.commands[commandName];
-        if(command) {
-            command.execute(this.pipe);
+        if(payload !== undefined) {
+            command.payload = payload;
+        } else {
+            command.payload = undefined;
         }
+        if(command) {
+            command.execute((usePipe) ? this.pipe : undefined);
+        }
+        return command;
     }
 
 }
