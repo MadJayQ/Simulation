@@ -18,7 +18,7 @@ const ColorSettings = require('./Settings/ColorSettings.js');
 const PythonInterpreter = require('./Commands/PythonInterpreter.js');
 const CommandInterpreter = require('./Commands/CommandInterpreter.js');
 const Commands = require('./Commands/Command.js');
-
+const MathExt = require('./math.js');
 
 class App {
     constructor() {
@@ -46,6 +46,20 @@ class App {
             new Commands.SettingsCommand(this.world, undefined),
             new Commands.CarsCommand(this.world)]
         );
+
+        var gen = require('random-seed');
+        var rand1 = gen.create("Hello World");
+        for(var i = 0; i < 3; i++) {
+            var num = rand1.intBetween(0, 10);
+        }
+        rand1 = gen.create("adfsadfsdf");
+        for(var i = 0; i < 3; i++) {
+            var num2 = rand1.intBetween(0, 10);
+        }
+        rand1 = gen.create("adfsadfsdf");
+        for(var i = 0; i < 3; i++) {
+            var num3 = rand1.intBetween(0, 10);
+        }
         return true;
     }
     exec() {

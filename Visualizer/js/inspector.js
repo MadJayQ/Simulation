@@ -40,6 +40,8 @@ function worldSettingsChanged(e) {
     var maxCapacity = Number($("#max-capacity-input").val());
     var minCost = Number($("#min-cost-input").val());
     var maxCost = Number($("#max-cost-input").val());
+    var seed = $("#randomizer-seed-input").val();
+    var machineEpislon = Number($("#mach-eps-input").val());
 
     var settings = require('../app/Settings/Settings.js');
     settings.worldSettings.tileWidth = worldWidth;
@@ -50,6 +52,8 @@ function worldSettingsChanged(e) {
     settings.worldSettings.maxCapacity = maxCapacity;
     settings.worldSettings.minCost = minCost;
     settings.worldSettings.maxCost = maxCost;
+    settings.miscSettings.seed = seed;
+    settings.miscSettings.machEps = machineEpislon;
     var SettingsCommand = new Commands.SettingsCommand(undefined, JSON.stringify(settings));
     SettingsCommand.issueRequest(ipcRenderer);
 }
@@ -58,14 +62,14 @@ function createCarTab(num, startPos, endPos, capacity) {
     var tabHtml = (' ' + tabTemplate).slice(1);
     tabHtml = tabHtml.split("%CARNUM%").join(num);
     var panel = $(tabHtml);
-    /*
+    
     panel.mouseenter(() => {
         visualizer.app.onCarHover(panel);
     });
     panel.mouseleave(() => {
         visualizer.app.onCarHoverLeave(panel);
     })
-    */
+    
     $("#cars-panel").append(panel);
     $("#car-" + num + "-body").append(
         $(carEditorTemplate.split("%CARNUM%").join(num))
@@ -93,6 +97,8 @@ function setDefaults(defaultSettings) {
     $("#max-capacity-input").val(defaultSettings.worldSettings.maxCapacity);
     $("#min-cost-input").val(defaultSettings.worldSettings.minCost);
     $("#max-cost-input").val(defaultSettings.worldSettings.maxCost);
+    $("#randomizer-seed-input").val(defaultSettings.miscSettings.seed);
+    $("#mach-eps-input").val(defaultSettings.miscSettings.machEps);
 }
 
 function requestCarUpdate() {

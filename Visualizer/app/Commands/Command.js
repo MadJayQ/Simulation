@@ -74,6 +74,7 @@ class SettingsCommand extends Command {
             var settingsPayload = JSON.parse(this.payload);
             this.world.settings.worldSettings = settingsPayload.worldSettings;
             this.world.settings.timeSettings = settingsPayload.timeSettings;
+            this.world.settings.miscSettings = settingsPayload.miscSettings;
         } else {
             var netMsg = new NetMsg(NetMsg.Type.TYPE_COMMAND_RESPONSE);
             pipe.sender.send("asynchronous-reply", netMsg.serialize(
@@ -133,12 +134,19 @@ class SimulationBakeCommand extends Command {
     finishSimulation(moveData) {
         var netMsg = new NetMsg(NetMsg.Type.TYPE_COMMAND_RESPONSE);
         this.world.executeMove(moveData);
+        var finished = this.world.isFinished();
         this.activePipe.sender.send("asynchronous-reply", netMsg.serialize(
             {
                 type: SimulationBakeCommand.REQ,
-                body: moveData
+                body: {
+                    data: moveData,
+                    finished: finished
+                }
             }
         ));
+        if(!finished) {
+            this.execute(this.activePipe);
+        }
     }
 
     execute(pipe) {
@@ -161,15 +169,16 @@ class RandomizeWorldCommand extends Command {
     }
 
     execute(pipe) {
+        MathExt.setRandomSeed(this.world.settings.miscSettings.seed) //Reset our sequence
         var w = this.world.width;
         var h = this.world.height;
-        var numCars = MathExt.randInt(this.world.settings.worldSettings.minCars, this.world.settings.worldSettings.maxCars);
+        var numCars = MathExt.seededRandInt(this.world.settings.worldSettings.minCars, this.world.settings.worldSettings.maxCars);
         var carSettings = {};
         var colorSettings = {};
         var tileSettings = {};
         
         for(var i = 0; i < numCars; i++) {
-            var startPos = [MathExt.randInt(0, w - 1), MathExt.randInt(0, h - 1)];
+            var startPos = [MathExt.seededRandInt(0, w - 1), MathExt.seededRandInt(0, h - 1)];
             var endPos = [0, 0];
             var width = this.world.settings.worldSettings.tileWidth;
             var tileIdx = MathExt.coordinatesToIndex(startPos[1], startPos[0], width);

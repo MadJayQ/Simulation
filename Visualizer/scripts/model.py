@@ -78,6 +78,7 @@ def simulationTick(world, timestamp):
     tiles = world["tiles"];
     width = int(world["settings"]["worldSettings"]["tileWidth"]);
     height = int(world["settings"]["worldSettings"]["tileHeight"]);
+    machineEpislon = int(world["settings"]["miscSettings"]["machEps"]);
     #Calculate the cost of the cell by taking the maximum time sensing plan across the whole game, and then multiplying it by an arbitrary value.
     moves = {};
     for tileIdx in tiles:
@@ -123,7 +124,7 @@ def simulationTick(world, timestamp):
                         largestUtilityIdx = [-1];
                         for i in range(0, len(evs)):
                             ev = evs[i];
-                            if abs(ev - largestUtility) < 1e-13:
+                            if abs(ev - largestUtility) < machineEpislon:
                                 largestUtilityIdx.append(i);
                             if ev > largestUtility:
                                 largestUtility = ev;
@@ -132,7 +133,7 @@ def simulationTick(world, timestamp):
                             shortestPath = 9999999;
                             shortestPathIdx = [-1];
                             for i in range(0, len(largestUtilityIdx)):
-                                if abs(shortestPathes[largestUtilityIdx[i]] - shortestPath) < 1e-13:
+                                if abs(shortestPathes[largestUtilityIdx[i]] - shortestPath) < machineEpislon:
                                     shortestPathIdx.append(largestUtilityIdx[i]);
                                 if shortestPathes[largestUtilityIdx[i]] < shortestPath:
                                     shortestPath = shortestPathes[largestUtilityIdx[i]];
@@ -151,7 +152,7 @@ def simulationTick(world, timestamp):
                         shortestPath = 9999999;
                         shortestPathIdx = [-1];
                         for i in range(0, len(shortestPathes)):
-                            if abs(shortestPathes[i] - shortestPath) < 1e-13:
+                            if abs(shortestPathes[i] - shortestPath) < machineEpislon:
                                 shortestPathIdx.append(i);
                             if shortestPathes[i] < shortestPath:
                                 shortestPath = shortestPathes[i];
@@ -163,6 +164,12 @@ def simulationTick(world, timestamp):
                         else:
                             newIdx = shortestPathIdx[0];
                     moves[currentCar] = {
+                        'data': {
+                          'evs': evs,
+                          'coords': coords,
+                          'shortestPathes': shortestPathes,
+                          'timeSensingPlans': timeSensingPlans
+                        },
                         'previous': tileIdx,
                         'new': adjacentCells[newIdx],
                         'newCapacity': newCapacity

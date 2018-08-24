@@ -6,7 +6,7 @@ class Car {
         this.endPos = endPos;
         this.color = "white";
         this.neighbors = [];
-        this.capacity = MathExt.randInt(500, 1500);
+        this.capacity = MathExt.seededRandInt(500, 1500);
     }
 
     SetColor(color) {

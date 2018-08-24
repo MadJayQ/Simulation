@@ -82,10 +82,23 @@ class World {
                     coords[0],
                     coords[1]
                 );
-                this.tiles[i].reward = MathExt.randInt(this.settings.worldSettings.minReward, this.settings.worldSettings.maxReward);
-                this.tiles[i].cost = MathExt.randNum(this.settings.worldSettings.minCost, this.settings.worldSettings.maxCost);
+                this.tiles[i].reward = MathExt.seededRandInt(this.settings.worldSettings.minReward, this.settings.worldSettings.maxReward);
+                this.tiles[i].cost = MathExt.seededRandFloat(this.settings.worldSettings.minCost, this.settings.worldSettings.maxCost);
             }
         }
+    }
+
+    isFinished() {
+        var finished = true;
+        for(var i = 0; i < this.cars.length; i++) {
+            var car = this.cars[i];
+            if(car.startPos[0] != car.endPos[0] || car.startPos[1] != car.endPos[1]) {
+                finished = false;
+                break;
+            }
+        }
+
+        return finished;
     }
     
     executeMove(moveData) {
@@ -113,7 +126,7 @@ class World {
         for(var i = 0; i < this.cars.length; i++) {
             var car = this.cars[i];
             if(car !== undefined) {
-                car.capacity = MathExt.randInt(this.settings.worldSettings.minCapacity, this.settings.worldSettings.maxCapacity) * maxTS;
+                car.capacity = MathExt.seededRandInt(this.settings.worldSettings.minCapacity, this.settings.worldSettings.maxCapacity) * maxTS;
             }
         }
     }

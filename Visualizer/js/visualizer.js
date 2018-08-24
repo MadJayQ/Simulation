@@ -2,6 +2,8 @@ const noUiSlider = require('nouislider')
 const {ipcRenderer} = require('electron');
 const wNumb = require('wNumb');
 
+const MoveData = require('./movedata.js');
+
 var slider = $("#time-scrubber").get(0);
 
 var dropzone = $("#dropzone").get(0);
@@ -218,6 +220,7 @@ const TimeScrubberModule = require('./timescrubber.js');
 const Inspector = require('./inspector.js');
 const MathExt = require('../app/math.js');
 
+
 class VisualizerApplet {
 	constructor(ipcPipe) {
 		this.ipcPipe = ipcPipe;
@@ -277,7 +280,12 @@ class VisualizerApplet {
 				break;
 			}
 			case Commands.SimulationBakeCommand.REQ: {
-				this.simulationWorld.executeMove(response.body);
+				var moveData = response.body.data;
+				var finished = response.body.finished;
+				this.simulationWorld.executeMove(moveData);
+				var move = JSON.parse(moveData);
+				MoveData.getInstance().addMove(move);
+				console.log(MoveData.getInstance().moves);
 				Inspector.requestCarUpdate();
 				this.drawSimulation();
 				break;
@@ -294,6 +302,7 @@ class VisualizerApplet {
 				var jsonWorld = JSON.parse(response.body);
 				var world = new SimulationWorld.Builder();
 				this.simulationWorld = world.deserializeWorld(jsonWorld).build();
+				MoveData.getInstance().newSimulation(this.simulationWorld.settings);
 				Inspector.requestCarUpdate();
 				this.drawSimulation();
 				break;
@@ -328,5 +337,9 @@ $(() => {
 	$("#simulation-Randomize").click(() => {
 		var netCmd = new Commands.RandomizeWorldCommand();
 		netCmd.issueRequest(ipcRenderer);
+	});
+
+	$("#exportBtn").click(() => {
+		MoveData.getInstance().export();
 	});
 });

@@ -16,6 +16,10 @@ var Settings = {
         maxTime: 60,
         timeScale: 1.0,
         timeStep: 0.015625
+    },
+    miscSettings: {
+        seed: 'Hello World!',
+        machEps: 1e-13
     }
 }
 
