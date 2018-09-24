@@ -1,6 +1,7 @@
 var NetMsg = require('./NetMsg.js');
 var SimulationWorld = require('../Simulation/World.js');
 const MathExt = require('../math.js')
+const fs = require("fs");
 
 class Command {
     constructor(requestName, responseCb, payload) {
@@ -61,6 +62,30 @@ class CarsCommand extends Command {
     }
     static get REQ() {
         return "cars";
+    }
+}
+
+class ReportCommand extends Command {
+    constructor(world, payload) {
+        super("report", () => {this.execute}, payload);
+        this.world = world;
+    }
+
+    execute(pipe) {
+        if(this.payload !== undefined) {
+            var test = this.payload;
+        } else {
+            var netMsg = new NetMsg(NetMsg.Type.TYPE_COMMAND_RESPONSE);
+            pipe.sender.send("asynchronous-reply", netMsg.serialize(
+                {
+                    type: ReportCommand.REQ,
+                    body: "INVALID REQUEST"
+                }
+            ));
+        }
+    }
+    static get REQ() {
+        return "report";
     }
 }
 
@@ -161,7 +186,64 @@ class SimulationBakeCommand extends Command {
     }
 }
 
+class ResetTileStatisticCommand extends Command {
+    constructor(world) {
+        super("reset-statistics", () => {this.execute});
+        this.payload = null;
+        this.world = world;
+    }
 
+    execute(pipe) {
+        this.world.resetTileStatistics();
+        var netMsg = new NetMsg(NetMsg.Type.TYPE_COMMAND_RESPONSE);
+        pipe.sender.send("asynchronous-reply", netMsg.serialize(
+            {
+                type: ResetTileStatisticCommand.REQ,
+                body: ""
+            }
+        ));
+    }
+
+    static get REQ() {
+        return "reset-statistics";
+    }
+}
+
+class ParseMapFileCommand extends Command {
+    constructor(world, payload) {
+        super("parse-map", () => {this.execute}, payload);
+        this.world = world;
+    }
+
+    execute(pipe) {
+        if(this.payload !== undefined) {
+            var mapName = this.payload.toString();
+            var edges = JSON.parse(fs.readFileSync('./maps/' + mapName + '/edges.json'), 'utf8');
+            var junctions = JSON.parse(fs.readFileSync('./maps/' + mapName + '/junctions.json', 'utf8'));
+            this.world.parseRoadMap(edges, junctions);
+            var netMsg = new NetMsg(NetMsg.Type.TYPE_COMMAND_RESPONSE);
+            pipe.sender.send("asynchronous-reply", netMsg.serialize(
+                {
+                    type: ParseMapFileCommand.REQ,
+                    body: "OK"
+                }
+            ));
+
+        }
+        else {
+            pipe.sender.send("asynchronous-reply", netMsg.serialize(
+                {
+                    type: ParseMapFileCommand.REQ,
+                    body: "FAIL"
+                }
+            ));
+        }
+    }
+
+    static get REQ() {
+        return "parse-map";
+    }
+}
 class RandomizeWorldCommand extends Command {
     constructor(world) {
         super("randomize-world", () => {this.execute});
@@ -195,6 +277,7 @@ class RandomizeWorldCommand extends Command {
         this.world.height = this.world.settings.worldSettings.tileHeight;
         this.world.constructTiles(this.world.width, this.world.height);
         this.world.applySettings();
+        this.world.setCarCapacity();
         var serialziedWorld = this.world.serialize();
 
         var netMsg = new NetMsg(NetMsg.Type.TYPE_COMMAND_RESPONSE);
@@ -219,3 +302,6 @@ module.exports.RandomizeWorldCommand = RandomizeWorldCommand;
 module.exports.MaximumTimeSensingCommand = MaximumTimeSensingCommand;
 module.exports.SettingsCommand = SettingsCommand;
 module.exports.CarsCommand = CarsCommand;
+module.exports.ReportCommand = ReportCommand;
+module.exports.ResetTileStatisticCommand = ResetTileStatisticCommand;
+module.exports.ParseMapFileCommand = ParseMapFileCommand;

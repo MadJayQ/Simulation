@@ -4,7 +4,8 @@
  * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap/blob/gh-pages/LICENSE)
  */
 body {
-  background-color: #f8f8f8;
+  background-color: #1c1c24;
+  color: #fff8f8;
 }
 #wrapper {
   width: 100%;
@@ -12,7 +13,7 @@ body {
 #page-wrapper {
   padding: 0 15px;
   min-height: 568px;
-  background-color: white;
+  background-color: rgb(46, 56, 60);
 }
 @media (min-width: 768px) {
   #page-wrapper {

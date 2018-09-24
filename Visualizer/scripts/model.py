@@ -17,14 +17,9 @@ def calculateTimeSensing(world, targetCell):
     numParticipants = len(tile["attachedEnts"]) + 1; #Add one to the number of entities to represent ourselves in the current iteration
     if(numParticipants < 2):
         numParticipants = 2;
-    #print("COST, NUMPARTIC");
-    #print(cost);
-    #print(numParticipants)
-    #print("/COST");
     totalCost = float(cost)  * float(numParticipants);
     predictedReward = float(numParticipants - 1) * reward;
     timeSensingPlan = float(predictedReward / totalCost) * (1.0 / float(numParticipants));
-    #print(timeSensingPlan);
     return timeSensingPlan;
 def calculateMaximumTimeSensing(world):
     tiles = world["tiles"];
@@ -38,11 +33,8 @@ def calculateExpectedUtility(world, targetCell, currentCar):
     width = world["settings"]["worldSettings"]["tileWidth"];
     height = world["settings"]["worldSettings"]["tileHeight"];
     reward = int(world["tiles"][str(targetCell)]["reward"]);
-    #print(reward);
     cellPosition = indexToCoordinates(targetCell, width);
     neighboringCells = getNeighboringCells(cellPosition[0], cellPosition[1], width, height); #Calculate our neighboring cells
-    #print(cellPosition);
-    #print("~~~");
     neighboringCars = [];
     for neighbor in neighboringCells: #Loop through all these cells, and count the number of cars
         #print(indexToCoordinates(neighbor, width));
@@ -105,12 +97,7 @@ def simulationTick(world, timestamp):
                         timeSensingPlans.append(calculateTimeSensing(world, adjacentCell));
                         coords.append(indexToCoordinates(adjacentCell, width));
                         shortestPathes.append(findShortestPath(coords[i], finish, width, height));
-                    print("BEFORE PRUNTING========");
-                    print(evs);
-                    print(timeSensingPlans);
-                    print(coords);
-                    print(shortestPathes);
-                    print("==============");
+                    didConsumeBudget = True;
                     availableTiles = [];
                     newIdx = -1;
                     newCapacity = capacity;
@@ -149,6 +136,7 @@ def simulationTick(world, timestamp):
                         newCapacity -= timeSensingPlans[newIdx];
                     else:
                         #Pick tile with shortest path
+                        didConsumeBudget = False
                         shortestPath = 9999999;
                         shortestPathIdx = [-1];
                         for i in range(0, len(shortestPathes)):
@@ -170,6 +158,8 @@ def simulationTick(world, timestamp):
                           'shortestPathes': shortestPathes,
                           'timeSensingPlans': timeSensingPlans
                         },
+                        'consumed': didConsumeBudget,
+                        'consumedAmount': evs[newIdx],
                         'previous': tileIdx,
                         'new': adjacentCells[newIdx],
                         'newCapacity': newCapacity

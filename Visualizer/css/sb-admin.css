@@ -281,7 +281,7 @@ body.sidenav-toggled #mainNav.static-top #sidenavToggler i {
 
 .content-wrapper {
   overflow-x: hidden;
-  background: white;
+  background: grey;
 }
 
 @media (min-width: 992px) {

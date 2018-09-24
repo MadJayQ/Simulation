@@ -4,7 +4,8 @@ from model import simulationTick
 from model import calculateMaximumTimeSensing
 
 def runSimulation():
-    worldJSON = json.loads(sys.argv[1]);
+    with open('./data.json', 'r') as f:
+        worldJSON = json.load(f)
     timeStep = worldJSON["settings"]["timeSettings"]["timeStep"];
     time = 0
     maxTime = worldJSON["settings"]["timeSettings"]["maxTime"]
@@ -25,7 +26,8 @@ def main():
             sys.stdout.flush();
         if command == "max-ts":
             sys.stdout.flush();
-            worldJSON = json.loads(sys.argv[1]);
+            with open('./data.json', 'r') as f:
+                worldJSON = json.load(f)
             maxTS = calculateMaximumTimeSensing(worldJSON);
             print("done");
             print(maxTS);

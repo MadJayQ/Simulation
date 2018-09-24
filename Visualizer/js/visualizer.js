@@ -3,12 +3,18 @@ const {ipcRenderer} = require('electron');
 const wNumb = require('wNumb');
 
 const MoveData = require('./movedata.js');
+const prompt = require('electron-prompt');
 
 var slider = $("#time-scrubber").get(0);
 
 var dropzone = $("#dropzone").get(0);
 var canvas = $("#draw-canvas").get(0);
 var ctx = canvas.getContext("2d");
+
+
+var newMap = false;
+
+
 
 /*
 
@@ -220,16 +226,24 @@ const TimeScrubberModule = require('./timescrubber.js');
 const Inspector = require('./inspector.js');
 const MathExt = require('../app/math.js');
 
+var mapFile = 'choose3';
+
 
 class VisualizerApplet {
 	constructor(ipcPipe) {
 		this.ipcPipe = ipcPipe;
 		this.simulationWorld = null;
 		this.timeScrubber = new TimeScrubberModule(undefined, ipcPipe);
+		this.heatmap = false;
 	
 	}
 
 	initialize() {
+		var thisPtr = this;
+		canvas.addEventListener("mousemove", (event) => { 
+			thisPtr.onCanvasMove.apply(thisPtr, [event])
+		}
+	);
 		this.ipcPipe.on("asynchronous-reply", (event, arg) => {
 			var possibleCommand = new NetMsg.Verify(arg);
 			if(possibleCommand.isMessage()) {
@@ -265,6 +279,33 @@ class VisualizerApplet {
 			this.drawSimulation();
 		}
 	}
+
+	onCanvasMove(event) {
+		var translateEventCoordinates = (event, canvas) => {
+			var x = event.clientX; // x coordinate of a mouse pointer
+			var y = event.clientY; // y coordinate of a mouse pointer
+			var rect = event.target.getBoundingClientRect();
+			x = (x - rect.left);
+			y = (y - rect.top);
+	
+			return {
+				x: x,
+				y: y
+			};
+		}
+		var coordinates = translateEventCoordinates(event, canvas);
+		var gridSize = {
+			x: canvas.width / this.simulationWorld.width,
+			y: canvas.height / this.simulationWorld.height,
+		};
+		var x = Math.floor(coordinates.x / gridSize.x);
+		var y = Math.floor(coordinates.y / gridSize.y);
+		var selectedTile = MathExt.coordinatesToIndex(y, x, this.simulationWorld.width);
+		this.selectedTile = selectedTile;
+		$("#ci-budget").val(this.simulationWorld.tiles[selectedTile].reward);
+		$("#ci-visited").val(this.simulationWorld.tiles[selectedTile].numVisited);
+		$("#cellidx").text(this.selectedTile.toString());
+	}
 	
 	handleCommandResponse(response) {
 		switch(response.type) {
@@ -288,6 +329,12 @@ class VisualizerApplet {
 				console.log(MoveData.getInstance().moves);
 				Inspector.requestCarUpdate();
 				this.drawSimulation();
+				if(finished) {
+					Inspector.requestNextSimulation();
+				}
+				break;
+			}
+			case Commands.MaximumTimeSensingCommand.REQ: {
 				break;
 			}
 			case Commands.SettingsCommand.REQ: {
@@ -307,17 +354,61 @@ class VisualizerApplet {
 				this.drawSimulation();
 				break;
 			}
+			case Commands.ParseMapFileCommand.REQ: {
+				var status = response.body;
+				if(status == "OK") {
+					new Commands.GridCommand(null).issueRequest(ipcRenderer);
+				} else {
+					console.error("SOMETHING WENT HORRIBLY WRONG!"); 
+				}
+				break;
+			}
 			default: break;
 		}
 	}
 
+	changeMapFile() {
+		prompt({
+        	title: 'New Map',
+        	label: 'New Map File:',
+			type: 'input'
+		}).then((r) => {
+			if(r != null) {
+				new Commands.ParseMapFileCommand(null, r).issueRequest(ipcRenderer);
+			}
+		})
+		/*
+		var mapFileName = prompt("Enter a mapfile name:");
+		new Commands.ParseMapFileCommand(null, mapFileName).issueRequest(ipcRenderer);
+		*/
+	}
+
 	drawSimulation() {
+		if(newMap) {
+			this.drawNewSimulation();
+			return;
+		}
 		if(this.simulationWorld == null) {
 			return;
 		}
 		canvas.width = canvas.clientWidth;
 		canvas.height = canvas.clientHeight;
-		this.simulationWorld.draw(ctx);
+		if(this.heatmap) {
+			this.simulationWorld.drawHeatmap(ctx);
+		} else {
+			this.simulationWorld.draw(ctx);
+		}
+	}
+
+	//This method is temporary, it will be condensed into the drawSimulationMethod
+	drawNewSimulation() {
+		if(this.simulationWorld == null) {
+			return;
+		}
+		canvas.width = canvas.clientWidth;
+		canvas.height = canvas.clientHeight;
+
+		this.simulationWorld.drawNodes(ctx);
 	}
 }
 
@@ -337,6 +428,25 @@ $(() => {
 	$("#simulation-Randomize").click(() => {
 		var netCmd = new Commands.RandomizeWorldCommand();
 		netCmd.issueRequest(ipcRenderer);
+	});
+
+	$("#toggleStyle").click(() => {
+		newMap = !newMap;
+		app.drawSimulation();
+	});
+
+	$("#newMapFile").click(() => {
+		app.changeMapFile();
+	});
+
+	$("#ciResetBtn").click(() => {
+		var netCmd = new Commands.ResetTileStatisticCommand();
+		app.heatmap = false;
+		netCmd.issueRequest(ipcRenderer); //Reset our stats
+	});
+	$("#ciHeatmap").click(() => {
+		app.heatmap = true;
+		app.drawSimulation();
 	});
 
 	$("#exportBtn").click(() => {

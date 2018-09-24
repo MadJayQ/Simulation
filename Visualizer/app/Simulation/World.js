@@ -29,6 +29,7 @@ class World {
         }
         */ 
         this.settings = (builder.settings != undefined) ? builder.settings : this.defaultSettings;
+        this.roadMapData = builder.roadMapData;
         if(this.settings != undefined) {
             if(builder.tileData !== undefined) {
                 this.tileData = builder.tileData;
@@ -42,6 +43,24 @@ class World {
             console.error("[WORLD]: Failed to create world: No settings available!");
             delete this;
         }
+    }
+
+    parseRoadMap(edges, junctions) {
+        var data = junctions;
+        for(var edgeKey in edges) {
+            var edge = edgeKey.split("_to_");
+            if(edge.length < 1) {
+                console.error("INVALID EDGE DATA");
+                continue;
+            }
+            var from = edge[0];
+            var to = edge[1];
+            if(data[from]['edges'] == undefined) {
+                data[from]['edges'] = {};
+            }
+            data[from]['edges'][to] = 1;
+        }
+        this.roadMapData = data;
     }
 
     defaultSettings() {
@@ -75,6 +94,7 @@ class World {
                     var startPos = tileData.attachedEnts[entKey]["startPos"];
                     var endPos = tileData.attachedEnts[entKey]["endPos"];                    
                     this.tiles[i].attachedEnts[entKey] = new Car(cID, startPos, endPos);
+                    MathExt.seededRandInt(this.settings.worldSettings.minCapacity, this.settings.worldSettings.maxCapacity) * this.maxTS;
                 }
             } else {
                 this.tiles[i] = new Tile.Tile(
@@ -107,6 +127,16 @@ class World {
         for (var move in moveData) {
             var newTile = this.tiles[parseInt(moveData[move]["new"])];
             var previousTile = this.tiles[parseInt(moveData[move]["previous"])];
+            var consumed = moveData[move]["consumed"];
+            newTile.numVisited = newTile.numVisited + 1; //Increment our tile stat
+            /*
+            For now, wer're going to fix the Reward across each cell.
+            if(consumed == false) {
+                var amount = parseInt(moveData[move]["consumedAmount"]);
+                if(newTile.reward < amount) amount = newTile.reward;
+                newTile.reward -= amount;
+            }
+            */
             var car = previousTile.attachedEnts[move];
             if(car !== undefined) {
                 var newCapacity = parseInt(moveData[move]["newCapacity"]);
@@ -122,11 +152,18 @@ class World {
         }
     }
 
+    resetTileStatistics() {
+        for(var i = 0; i < this.tiles.length; i++) {
+            this.tiles[i].numVisited = 0;
+        }
+    }
+
     setCarCapacity(maxTS) {
+        if(maxTS !== undefined) this.maxTS = maxTS;
         for(var i = 0; i < this.cars.length; i++) {
             var car = this.cars[i];
             if(car !== undefined) {
-                car.capacity = MathExt.seededRandInt(this.settings.worldSettings.minCapacity, this.settings.worldSettings.maxCapacity) * maxTS;
+                car.capacity = MathExt.seededRandInt(this.settings.worldSettings.minCapacity, this.settings.worldSettings.maxCapacity) * this.maxTS;
             }
         }
     }
@@ -205,10 +242,54 @@ class World {
         }
         var data = {
             settings: this.settings,
-            tiles: tileData
-        }
+            tiles: tileData,
+            roadMapData: this.roadMapData
+        };
 
         return JSON.stringify(data);
+    }
+
+    drawHeatmap(ctx) {
+        var w = ctx.canvas.width / this.width;
+        var h = ctx.canvas.height / this.height;
+        var totalVisited = 0;
+        for(var i = 0; i < this.tiles.length; i++) {
+            var tile = this.tiles[i];
+            totalVisited += tile.numVisited;
+        }
+        var avgVisited = totalVisited / this.tiles.length;
+        for(var i = 0; i < this.tiles.length; i++) {
+            var tile = this.tiles[i];
+            tile.drawHeatmap(ctx, w, h, tile.numVisited / avgVisited);
+        }
+    }
+
+    drawNodes(ctx) {
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'black';
+        ctx.beginPath();
+        ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = 'red';
+        for(var nodeKey in this.roadMapData) {
+            var node = this.roadMapData[nodeKey];
+            var x = 15 + (node.normal_center_coords[0] * (ctx.canvas.width * 0.8)); 
+            var y =  15 + (node.normal_center_coords[1] * (ctx.canvas.height * 0.9)); 
+            ctx.beginPath();
+            ctx.arc(x, y, 1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            for(var edgeKey in node['edges']) {
+                var dstNode = this.roadMapData[edgeKey];
+                var dstX = 15 + (dstNode.normal_center_coords[0] * (ctx.canvas.width * 0.8)); 
+                var dstY = 15 + (dstNode.normal_center_coords[1] * (ctx.canvas.height * 0.9));
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(dstX, dstY);
+                ctx.stroke();
+            }
+        }
     }
 
     draw(ctx) {
@@ -272,6 +353,7 @@ class World {
             deserializeWorld(serializedWorld) {
                 this.settings = serializedWorld.settings;
                 this.tileData = serializedWorld.tiles;
+                this.roadMapData = serializedWorld.roadMapData;
                 return this;
             }
 

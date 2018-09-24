@@ -36,6 +36,7 @@ class App {
                     applyCarSettings(CarSettings).
                     applyColorSettings(ColorSettings).
                     build();
+
         this.commandInterpreter = new CommandInterpreter(ipcMain);
         this.pythonInterpreter = new PythonInterpreter('/scripts/exec.py'); //Create our executor
         this.commandInterpreter.registerCommands([
@@ -44,8 +45,11 @@ class App {
             new Commands.MaximumTimeSensingCommand(this.world, this.pythonInterpreter),
             new Commands.RandomizeWorldCommand(this.world),
             new Commands.SettingsCommand(this.world, undefined),
-            new Commands.CarsCommand(this.world)]
-        );
+            new Commands.ReportCommand(this.world, undefined),
+            new Commands.CarsCommand(this.world),
+            new Commands.ResetTileStatisticCommand(this.world),
+            new Commands.ParseMapFileCommand(this.world)
+        ]);
 
         var gen = require('random-seed');
         var rand1 = gen.create("Hello World");
