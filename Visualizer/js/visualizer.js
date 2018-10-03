@@ -14,8 +14,6 @@ var ctx = canvas.getContext("2d");
 
 var newMap = false;
 
-
-
 /*
 
 dropzone.addEventListener("drop", (event) => {
@@ -228,13 +226,19 @@ const MathExt = require('../app/math.js');
 
 var mapFile = 'choose3';
 
-
+var DrawModes = {
+	DRAWMODE_REGULAR: 0,
+	DRAWMODE_EDITOR: 1,
+	DRAWMODE_HEATMAP: 2
+};
 class VisualizerApplet {
+
 	constructor(ipcPipe) {
 		this.ipcPipe = ipcPipe;
 		this.simulationWorld = null;
 		this.timeScrubber = new TimeScrubberModule(undefined, ipcPipe);
 		this.heatmap = false;
+		this.drawmode = DrawModes.DRAWMODE_REGULAR;
 	
 	}
 
@@ -393,10 +397,10 @@ class VisualizerApplet {
 		}
 		canvas.width = canvas.clientWidth;
 		canvas.height = canvas.clientHeight;
-		if(this.heatmap) {
-			this.simulationWorld.drawHeatmap(ctx);
-		} else {
-			this.simulationWorld.draw(ctx);
+		switch(this.drawmode) {
+			case DrawModes.DRAWMODE_REGULAR: this.simulationWorld.draw(ctx); break;
+			case DrawModes.DRAWMODE_EDITOR: this.simulationWorld.drawMapEditor(ctx); break;
+			case DrawModes.DRAWMODE_HEATMAP: this.simulationWorld.drawHeatmap(ctx); break;
 		}
 	}
 
@@ -441,14 +445,21 @@ $(() => {
 
 	$("#ciResetBtn").click(() => {
 		var netCmd = new Commands.ResetTileStatisticCommand();
-		app.heatmap = false;
+		app.drawmode = DrawModes.DRAWMODE_REGULAR;
 		netCmd.issueRequest(ipcRenderer); //Reset our stats
 	});
-	$("#ciHeatmap").click(() => {
-		app.heatmap = true;
+	$("#liDrawmodeRegular").click(() => {
+		app.drawmode = DrawModes.DRAWMODE_REGULAR;
 		app.drawSimulation();
 	});
-
+	$("#liDrawmodeEditor").click(() => {
+		app.drawmode = DrawModes.DRAWMODE_EDITOR;
+		app.drawSimulation();
+	});
+	$("#liDrawmodeHeatmap").click(() => {
+		app.drawmode = DrawModes.DRAWMODE_HEATMAP
+		app.drawSimulation();
+	});
 	$("#exportBtn").click(() => {
 		MoveData.getInstance().export();
 	});

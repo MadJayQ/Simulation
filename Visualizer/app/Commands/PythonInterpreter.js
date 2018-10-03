@@ -1,5 +1,6 @@
 const PythonShell = require('python-shell');
 const fs = require('fs');
+const AppSettings = require('../appsettings.js');
 var finishCallback = undefined;
 class PythonInterpreter {
     constructor(executor) {
@@ -15,11 +16,12 @@ class PythonInterpreter {
     startModule(world) {
         var serializedWorld = world.serialize();
         fs.writeFileSync('./data.json', serializedWorld);
+        var pythonPath = AppSettings().getInstance().pythonPath;
         this.shell = new PythonShell(
             this.executor, {
                 pythonOptions: ['-B'], 
                 mode: 'text',
-                pythonPath: 'F:\\Programming\\Languages\\Emscripten\\python\\2.7.5.3_64bit\\python',
+                pythonPath: pythonPath,
                 args: [world.width, world.height]
             }
         );

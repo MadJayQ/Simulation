@@ -34,7 +34,7 @@ def main():
             running = False;
             sys.stdout.flush();
         time.sleep(0.1);
-        
+            
 
 if __name__ == '__main__':
     main();

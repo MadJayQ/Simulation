@@ -112,6 +112,7 @@ class World {
         var finished = true;
         for(var i = 0; i < this.cars.length; i++) {
             var car = this.cars[i];
+            if(car == undefined) continue;
             if(car.startPos[0] != car.endPos[0] || car.startPos[1] != car.endPos[1]) {
                 finished = false;
                 break;
@@ -179,7 +180,12 @@ class World {
                 var carObject = new Car(carIdx, startPos, endPos);
                 this.cars[carIdx] = carObject;
                 var spawnTileID = MathExt.coordinatesToIndex(startPos[1], startPos[0], this.width);
-                this.tiles[spawnTileID].attachedEnts["car-" + carIdx] = carObject;
+                var tile = this.tiles[spawnTileID];
+                if(tile == undefined) {
+                    console.log("FAIL!");
+                    continue;
+                }
+                tile.attachedEnts["car-" + carIdx] = carObject;
             }
         }
         var colorSettings = this.settings.colorSettings;
@@ -247,6 +253,22 @@ class World {
         };
 
         return JSON.stringify(data);
+    }
+
+    drawMapEditor(ctx) {
+        var w = ctx.canvas.width / this.width;
+        var h = ctx.canvas.height / this.height;
+        var size = this.tiles.length || Object.keys(this.tiles).length;
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'black';
+        ctx.beginPath();
+        ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.fill();
+        ctx.stroke();
+        for(var i = 0; i < size; i++) {
+            var tile = this.tiles[i] || this.tiles[toString(i)];
+            tile.drawSpawnChances(ctx, w, h, tile.spawnChance, tile.dstChance);
+        }
     }
 
     drawHeatmap(ctx) {

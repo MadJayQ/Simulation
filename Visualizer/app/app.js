@@ -19,6 +19,7 @@ const PythonInterpreter = require('./Commands/PythonInterpreter.js');
 const CommandInterpreter = require('./Commands/CommandInterpreter.js');
 const Commands = require('./Commands/Command.js');
 const MathExt = require('./math.js');
+const AppSettings = require('./appsettings.js');
 
 class App {
     constructor() {
@@ -37,6 +38,8 @@ class App {
                     applyColorSettings(ColorSettings).
                     build();
 
+        AppSettings().getInstance().loadFromFile("./application_settings.json");
+
         this.commandInterpreter = new CommandInterpreter(ipcMain);
         this.pythonInterpreter = new PythonInterpreter('/scripts/exec.py'); //Create our executor
         this.commandInterpreter.registerCommands([
@@ -44,26 +47,13 @@ class App {
             new Commands.SimulationBakeCommand(this.world, this.pythonInterpreter),
             new Commands.MaximumTimeSensingCommand(this.world, this.pythonInterpreter),
             new Commands.RandomizeWorldCommand(this.world),
-            new Commands.SettingsCommand(this.world, undefined),
-            new Commands.ReportCommand(this.world, undefined),
+            new Commands.SettingsCommand(this.world),
+            new Commands.ReportCommand(this.world),
             new Commands.CarsCommand(this.world),
             new Commands.ResetTileStatisticCommand(this.world),
             new Commands.ParseMapFileCommand(this.world)
         ]);
 
-        var gen = require('random-seed');
-        var rand1 = gen.create("Hello World");
-        for(var i = 0; i < 3; i++) {
-            var num = rand1.intBetween(0, 10);
-        }
-        rand1 = gen.create("adfsadfsdf");
-        for(var i = 0; i < 3; i++) {
-            var num2 = rand1.intBetween(0, 10);
-        }
-        rand1 = gen.create("adfsadfsdf");
-        for(var i = 0; i < 3; i++) {
-            var num3 = rand1.intBetween(0, 10);
-        }
         return true;
     }
     exec() {

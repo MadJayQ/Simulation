@@ -258,10 +258,35 @@ class RandomizeWorldCommand extends Command {
         var carSettings = {};
         var colorSettings = {};
         var tileSettings = {};
+
+        var spawnTileBucket = [];
+        var dstTileBucket = [];
+        var numTiles = this.world.tiles.length;
+        
+        for(var i = 0; i < this.world.tiles.length; i++) {
+            var tile = this.world.tiles[i];
+            var numSpawnTickets = Math.round(tile.spawnChance * numTiles);
+            var numDstTickets = Math.round(tile.dstChance * numTiles);
+
+            var spawnTickets = Array(numSpawnTickets).fill(tile.tID);
+            var dstTickets = Array(numDstTickets).fill(tile.tID);
+
+            spawnTileBucket = spawnTileBucket.concat(
+                spawnTickets
+            );
+
+            dstTileBucket = dstTileBucket.concat(
+                dstTickets
+            );
+        }
         
         for(var i = 0; i < numCars; i++) {
-            var startPos = [MathExt.seededRandInt(0, w - 1), MathExt.seededRandInt(0, h - 1)];
-            var endPos = [0, 0];
+            var startIdx = spawnTileBucket[MathExt.seededRandInt(0, spawnTileBucket.length)];
+            var endIdx = dstTileBucket[MathExt.seededRandInt(0, dstTileBucket.length)];
+            var startTile = this.world.tiles[startIdx];
+            var endTile = this.world.tiles[endIdx];
+            var startPos = startTile.pos;
+            var endPos = endTile.pos;
             var width = this.world.settings.worldSettings.tileWidth;
             var tileIdx = MathExt.coordinatesToIndex(startPos[1], startPos[0], width);
             carSettings[i] = {
