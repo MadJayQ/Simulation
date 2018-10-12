@@ -78,8 +78,8 @@ class World {
                 var tileData = this.tileData[i];
                 this.tiles[i] = new Tile.Tile(
                     i,
-                    coords[0],
-                    coords[1]
+                    coords[1],
+                    coords[0]
                 );
                 if(i == 71) {
                     var tt = Object.keys(tileData.attachedEnts);
@@ -99,12 +99,37 @@ class World {
             } else {
                 this.tiles[i] = new Tile.Tile(
                     i,
-                    coords[0],
-                    coords[1]
+                    coords[1],
+                    coords[0]
                 );
                 this.tiles[i].reward = MathExt.seededRandInt(this.settings.worldSettings.minReward, this.settings.worldSettings.maxReward);
                 this.tiles[i].cost = MathExt.seededRandFloat(this.settings.worldSettings.minCost, this.settings.worldSettings.maxCost);
             }
+        }
+    }
+
+    distributeBudget(budget, min) {
+        var subBudgets = new Array(this.tiles.length);
+        var rands = new Array(this.tiles.length);
+        var k = 0.0
+        var err = 0.0
+        var sum = 0.0
+        budget -= this.tiles.length * min;
+        for(var i = 0; i < this.tiles.length; i++) {
+            rands[i] = MathExt.seededRandFloat(0, 1);
+            sum += rands[i];
+        }
+        k = budget / sum;
+        for(var i = 1; i < this.tiles.length; i++) {
+            var y = k * rands[i] + err;
+            var z = Math.floor(y + 0.5);
+            subBudgets[i] = min + z;
+            budget -= z;
+            err = y - z;
+        }
+        subBudgets[0] = min + budget;
+        for(var i = 0; i < this.tiles.length; i++) {
+            this.tiles[i].reward = subBudgets[i];
         }
     }
 
@@ -113,9 +138,12 @@ class World {
         for(var i = 0; i < this.cars.length; i++) {
             var car = this.cars[i];
             if(car == undefined) continue;
-            if(car.startPos[0] != car.endPos[0] || car.startPos[1] != car.endPos[1]) {
+            if(car.finished == true) continue;
+            if(car.currentPos[0] != car.endPos[0] || car.currentPos[1] != car.endPos[1]) {
                 finished = false;
                 break;
+            } else {
+                car.finished = true;
             }
         }
 
@@ -123,8 +151,11 @@ class World {
     }
     
     executeMove(moveData) {
-        moveData = JSON.parse(moveData);
-        console.log("MOVE DATA!");
+        try {
+            moveData = JSON.parse(moveData);
+        } catch (ex) {
+            return;
+        }
         for (var move in moveData) {
             var newTile = this.tiles[parseInt(moveData[move]["new"])];
             var previousTile = this.tiles[parseInt(moveData[move]["previous"])];
@@ -141,12 +172,15 @@ class World {
             var car = previousTile.attachedEnts[move];
             if(car !== undefined) {
                 var newCapacity = parseInt(moveData[move]["newCapacity"]);
+                var finishedCached = previousTile.attachedEnts[move].finished;
                 delete previousTile.attachedEnts[move];
                 var newCoords = MathExt.indexToCoordinates(parseInt(moveData[move]["new"]), this.width);
                 var cID = car["cID"];
-                newTile.attachedEnts[move] = new Car(car["cID"], newCoords, car["endPos"]);
+                newTile.attachedEnts[move] = new Car(car["cID"], car["startPos"], car["endPos"]);
                 this.cars[Number(cID)] = newTile.attachedEnts[move];
                 newTile.attachedEnts[move].capacity = newCapacity;
+                newTile.attachedEnts[move].currentPos = newTile.pos;
+                newTile.attachedEnts[move].finished = finishedCached;
                 newTile.justUpdated = true;
                 previousTile.justUpdated = true;
             }
@@ -186,6 +220,9 @@ class World {
                     continue;
                 }
                 tile.attachedEnts["car-" + carIdx] = carObject;
+                if(carSetting.capacity != undefined) {
+                    tile.attachedEnts["car-" + carIdx].capacity = carSetting.capacity;
+                }
             }
         }
         var colorSettings = this.settings.colorSettings;
@@ -224,10 +261,14 @@ class World {
         for(var i = 0; i < this.cars.length; i++) {
             var car = this.cars[i];
             if(car !== undefined) {
+                if(car.finished) {
+                    continue;
+                }
                 carData[i] = {
-                    startPos: car.startPos,
+                    startPos: car.currentPos,
                     endPos: car.endPos,
-                    capacity: car.capacity
+                    capacity: car.capacity,
+                    finished: car.finished
                 }
             }
         }

@@ -244,6 +244,66 @@ class ParseMapFileCommand extends Command {
         return "parse-map";
     }
 }
+
+class CreateTestCaseCommand extends Command {
+    constructor(world) {
+        super("testcase-world", () => {this.execute});
+        this.world = world;
+    }
+
+    execute(pipe) {
+        var w = 20;
+        var h = 20;
+        var numCars = 5;
+        var carSettings = {};
+        var tileSettings = {};
+        
+        var tileStarts = [262, 325, 25, 36, 80];
+        var endTiles = [109, 173, 35, 294, 262];
+
+        this.world.tiles = [];
+        this.world.tileData = undefined;
+        this.world.constructTiles(w, h);
+
+        for(var i = 0; i < numCars; i++) {
+            var startPos = this.world.tiles[tileStarts[i]].pos;
+            var endPos = this.world.tiles[endTiles[i]].pos
+            carSettings[i] = {
+                startPos: startPos,
+                endPos: endPos,
+                capacity: 5000
+            };
+        }
+
+        this.world.settings.worldSettings.tileWidth = w;
+        this.world.settings.worldSettings.tileHeight = h;
+
+        this.world.settings.carSettings = carSettings;
+        this.world.settings.tileSettings = tileSettings;
+        this.world.width = w;
+        this.world.height = h;
+        this.world.applySettings();
+        this.world.setCarCapacity();
+
+        this.world.distributeBudget(25000, 0);
+
+        var serialziedWorld = this.world.serialize();
+        
+        var netMsg = new NetMsg(NetMsg.Type.TYPE_COMMAND_RESPONSE);
+        pipe.sender.send("asynchronous-reply", netMsg.serialize(
+            {
+                type: CreateTestCaseCommand.REQ,
+                body: serialziedWorld
+            }
+        ));
+
+        console.log("DONE!");
+    }
+
+    static get REQ() {
+        return "testcase-world"
+    }
+}
 class RandomizeWorldCommand extends Command {
     constructor(world) {
         super("randomize-world", () => {this.execute});
@@ -330,3 +390,4 @@ module.exports.CarsCommand = CarsCommand;
 module.exports.ReportCommand = ReportCommand;
 module.exports.ResetTileStatisticCommand = ResetTileStatisticCommand;
 module.exports.ParseMapFileCommand = ParseMapFileCommand;
+module.exports.CreateTestCaseCommand = CreateTestCaseCommand;

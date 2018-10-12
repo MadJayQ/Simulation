@@ -22,7 +22,7 @@ def main():
             newWorld = runSimulation();
             running = False;
             sys.stdout.flush();
-            print(newWorld);
+            print(json.dumps(newWorld));
             sys.stdout.flush();
         if command == "max-ts":
             sys.stdout.flush();
@@ -34,7 +34,7 @@ def main():
             running = False;
             sys.stdout.flush();
         time.sleep(0.1);
-            
+        
 
 if __name__ == '__main__':
     main();

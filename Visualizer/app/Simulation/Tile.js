@@ -17,6 +17,8 @@ var stringifyColor = function(color) {
     return 'rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ')';
 }
 
+const MathExt = require('../math.js');
+
 
 class Tile {
     constructor(tID, x, y) {
@@ -26,14 +28,14 @@ class Tile {
         this.traversable = true;
         this.justUpdated = false;
         this.numVisited = 0;
-        this.spawnChance = Math.random();
-        this.dstChance = Math.random();
+        this.spawnChance = MathExt.seededRandFloat(0.0, 1.0);
+        this.dstChance = MathExt.seededRandFloat(0.0, 1.0);
         this.color = 'white';
     }
 
     drawLabel(ctx, width, height, text, fontSize, fontName) {
-        var x = this.pos[1] * width;
-        var y = this.pos[0] * height;
+        var x = this.pos[0] * width;
+        var y = this.pos[1] * height;
 
         ctx.font = fontSize.toString() + "px " + fontName;
         var textSize = ctx.measureText(text);
@@ -46,8 +48,8 @@ class Tile {
     }
     
     drawSpawnChances(ctx, width, height, spawnFraction, dstFrac) {
-        var x = this.pos[1] * width;
-        var y = this.pos[0] * height;
+        var x = this.pos[0] * width;
+        var y = this.pos[1] * height;
 
         var startColor = [255, 255, 255];
         var targetSpawn = [255, 0, 0];
@@ -60,15 +62,21 @@ class Tile {
         ctx.fillStyle = actualSpawnColor;
         ctx.strokeStyle = actualSpawnColor
         ctx.beginPath();
-        ctx.rect(x, y, width / 2, height);
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + width, y);
+        ctx.lineTo(x + width, y + height);
         ctx.fill();
         ctx.stroke();
+        
         ctx.fillStyle = actualDstColor;
         ctx.strokeStyle = actualDstColor;
         ctx.beginPath();
-        ctx.rect(x + (width / 2), y, width / 2, height);
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + height);
+        ctx.lineTo(x + width, y + height);
         ctx.fill();
         ctx.stroke();
+    
         //Clearly Define tile outline
         ctx.fillStyle = 'white';
         ctx.strokeStyle = 'black';
@@ -93,8 +101,8 @@ class Tile {
         ctx.fillStyle = this.color;
         ctx.strokeStyle = 'black';
         ctx.beginPath();
-        var x = this.pos[1] * width;
-        var y = this.pos[0] * height;
+        var x = this.pos[0] * width;
+        var y = this.pos[1] * height;
         ctx.rect(x, y, width, height);
         ctx.fill();
         ctx.stroke();

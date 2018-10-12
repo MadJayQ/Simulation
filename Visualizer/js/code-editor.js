@@ -19,7 +19,7 @@ $(() => {
     texteditor.id = "text-editor";
     texteditor.className = "code-editor";
     editor.appendChild(texteditor);
-    var module = fs.readFileSync("scripts/" + GET["file"]);
+    var module = fs.readFileSync("model/" + GET["file"]);
     texteditor.value = module.toString();
     require("codemirror/mode/python/python");
     require("codemirror/addon/edit/closebrackets");
@@ -35,7 +35,7 @@ $(() => {
     header.innerText += " | " + GET["file"];
 
     $("#save-button").click(() => {
-        var path = "scripts/" + window.editFile;
+        var path = "model/" + window.editFile;
         codeEditor.save();
         fs.writeFile(
             path, 

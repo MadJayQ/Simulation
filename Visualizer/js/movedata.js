@@ -6,6 +6,30 @@ class _MoveData_
         this.itr = 0;
     }
 
+    get CoverageLastSimulation() {
+        var simulation = this.moves[this.lastSimulation];
+        console.log(simulation.settings);
+        var worldSettings = simulation.settings.worldSettings;
+        var tiles = new Array(worldSettings.tileWidth * worldSettings.tileHeight);
+        tiles.fill(0);
+        console.log(tiles);
+        for(var roundNum in simulation) {
+            var round = simulation[roundNum];
+            for(var carName in round) {
+                if(!carName.includes("car-")) continue;
+                var carMove = round[carName];
+                tiles[carMove.new] = 1;
+            }
+        }
+        var count = 0;
+        for(var i = 0; i < tiles.length; i++) {
+            if(tiles[i] == 1) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     newSimulation(settings) {
         this.lastSimulation = (new Date).toISOString();
         this.moves[this.lastSimulation] = {

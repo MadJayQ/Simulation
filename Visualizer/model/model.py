@@ -6,6 +6,8 @@ from utils import findShortestPath
 import random
 import json
 
+import sys, time
+
 paths = [];
 skipSelf = False;
 def calculateTimeSensing(world, targetCell):
@@ -48,6 +50,8 @@ def calculateExpectedUtility(world, targetCell, currentCar):
                 continue;
             neighboringCars.append(neighborEnts[ent]);
     totalNeighbors = len(neighboringCars);
+    if totalNeighbors == 0:
+        totalNeighbors = 2;
     #print(totalNeighbors);
     combinedProbabilityDenominator = 0
     combinedProbability = 0
@@ -55,17 +59,20 @@ def calculateExpectedUtility(world, targetCell, currentCar):
     #print("...............");
     for n in range(0, totalNeighbors): #Sum the combined combinations formula
         combinedProbabilityDenominator += ncr(totalNeighbors - 1, n - 1);
-    #print(combinedProbabilityDenominator)
     #print("...............");
-    for n in range(1, totalNeighbors):
-        n = ncr(totalNeighbors - 1, n - 1);
-        utility = float(n * reward) / float(combinedProbabilityDenominator * (n ** 2));
-        expectedUtility += utility; 
+    if totalNeighbors > 1:
+        for n in range(1, totalNeighbors):
+            n = ncr(totalNeighbors - 1, n - 1);
+            utility = float(n * reward) / float(combinedProbabilityDenominator * (n ** 2));
+            expectedUtility += utility;
+    else:
+        expectedUtility = float(totalNeighbors * reward) / float(combinedProbabilityDenominator * (totalNeighbors ** 2)); 
     #print("/////////////////");
     #print(expectedUtility);
     return expectedUtility;
 
 def simulationTick(world, timestamp):
+
     cars = world["settings"]["carSettings"];
     tiles = world["tiles"];
     width = int(world["settings"]["worldSettings"]["tileWidth"]);
@@ -83,8 +90,8 @@ def simulationTick(world, timestamp):
                     carObj = attachedEnts[currentCar];
                     start = carObj["startPos"];
                     finish = carObj["endPos"];
-                    if start[0] == finish[0] and start[1] == finish[1]:
-                        continue;
+                    if carObj["finished"] == True:
+                        continue
                     adjacentCells = getNeighboringCells(tilePos[0], tilePos[1], width, height);
                     evs = [];
                     shortestPathes = [];
@@ -105,7 +112,12 @@ def simulationTick(world, timestamp):
                         timeSensingPlan = timeSensingPlans[i];
                         if(capacity > timeSensingPlan):
                             availableTiles.append(i);
-                    if len(availableTiles) > 0:
+                    maxEV = -99999
+                    for i in range(0, len(evs)):
+                        ev = evs[i]
+                        if(ev > maxEV):
+                            maxEV = ev
+                    if len(availableTiles) > 0 and maxEV > 0:
                         #Pick tile with greatest utility
                         largestUtility = -999999;
                         largestUtilityIdx = [-1];
@@ -164,6 +176,6 @@ def simulationTick(world, timestamp):
                         'new': adjacentCells[newIdx],
                         'newCapacity': newCapacity
                     };
-    return json.dumps(moves);
+    return moves;
 
                 

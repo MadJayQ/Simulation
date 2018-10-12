@@ -4,13 +4,19 @@ class Car {
         this.cID = cID;
         this.startPos = startPos;
         this.endPos = endPos;
+        this.currentPos = startPos;
         this.color = "white";
         this.neighbors = [];
         this.capacity = MathExt.seededRandInt(500, 1500);
+        this.finished = false;
     }
 
     SetColor(color) {
         this.color = color;
+    }
+
+    executeMove(previousTile, newTile) {
+        
     }
 
     draw(ctx, x, y, w, h) {

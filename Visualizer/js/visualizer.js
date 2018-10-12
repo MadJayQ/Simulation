@@ -330,7 +330,6 @@ class VisualizerApplet {
 				this.simulationWorld.executeMove(moveData);
 				var move = JSON.parse(moveData);
 				MoveData.getInstance().addMove(move);
-				console.log(MoveData.getInstance().moves);
 				Inspector.requestCarUpdate();
 				this.drawSimulation();
 				if(finished) {
@@ -349,6 +348,7 @@ class VisualizerApplet {
 				Inspector.populateCars(response.body);
 				break;
 			}
+			case Commands.CreateTestCaseCommand.REQ:
 			case Commands.RandomizeWorldCommand.REQ: {
 				var jsonWorld = JSON.parse(response.body);
 				var world = new SimulationWorld.Builder();
@@ -431,6 +431,10 @@ $(() => {
 
 	$("#simulation-Randomize").click(() => {
 		var netCmd = new Commands.RandomizeWorldCommand();
+		netCmd.issueRequest(ipcRenderer);
+	});
+	$("#simulation-TestCase").click(() => {
+		var netCmd = new Commands.CreateTestCaseCommand();
 		netCmd.issueRequest(ipcRenderer);
 	});
 

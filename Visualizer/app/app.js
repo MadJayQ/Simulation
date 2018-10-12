@@ -41,7 +41,7 @@ class App {
         AppSettings().getInstance().loadFromFile("./application_settings.json");
 
         this.commandInterpreter = new CommandInterpreter(ipcMain);
-        this.pythonInterpreter = new PythonInterpreter('/scripts/exec.py'); //Create our executor
+        this.pythonInterpreter = new PythonInterpreter('/model/exec.py'); //Create our executor
         this.commandInterpreter.registerCommands([
             new Commands.GridCommand(this.world),
             new Commands.SimulationBakeCommand(this.world, this.pythonInterpreter),
@@ -51,7 +51,8 @@ class App {
             new Commands.ReportCommand(this.world),
             new Commands.CarsCommand(this.world),
             new Commands.ResetTileStatisticCommand(this.world),
-            new Commands.ParseMapFileCommand(this.world)
+            new Commands.ParseMapFileCommand(this.world),
+            new Commands.CreateTestCaseCommand(this.world)
         ]);
 
         return true;
