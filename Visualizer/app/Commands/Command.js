@@ -300,7 +300,11 @@ class CreateTestCaseCommand extends Command {
                 var weight = ((pixelData[0] + pixelData[1] + pixelData[2]) / 3) / 255;
                 weights[pixelCounter++] = weight;
             }
-            worldCtx.distributeBudget(0, 0, weights);
+            //worldCtx.distributeBudget(0, 0, weights);
+            worldCtx.distributeBudget(0, 0, [
+                [10, 10]
+            ]);
+            
             var serialziedWorld = worldCtx.serialize();
             var netMsg = new NetMsg(NetMsg.Type.TYPE_COMMAND_RESPONSE);
             pipe.sender.send("asynchronous-reply", netMsg.serialize(

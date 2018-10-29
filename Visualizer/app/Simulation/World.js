@@ -108,7 +108,33 @@ class World {
         }
     }
 
-    distributeBudget(budget, min, weights) {
+    distributeBudget(budget, min, clusterPositions) {
+
+        createCluster = (x, y, width, size, weights) => {
+            var step = 1.0 / size;
+            var counter = 1;
+            weights[MathExt.coordinatesToIndex(y, x)] += 1.0;
+            for(var weight = 1.0 - step; weight > 0; weight -= step) {
+                weights[MathExt.coordinatesToIndex(y, x - counter, width)] += weight;
+                weights[MathExt.coordinatesToIndex(y - counter, x, width)] += weight;
+                weights[MathExt.coordinatesToIndex(y - counter, x - counter, width)] += weight;
+                weights[MathExt.coordinatesToIndex(y, x + counter, width)] += weight;
+                weights[MathExt.coordinatesToIndex(y + counter, x, width)] += weight;
+                weights[MathExt.coordinatesToIndex(y + counter, x + counter, width)] += weight;
+                weights[MathExt.coordinatesToIndex(y + counter, x - counter, width)] += weight;
+                weights[MathExt.coordinatesToIndex(y - counter, x + counter, width)] += weight;
+            }
+        }
+        var weights = new Array(this.tiles.length);
+        for(var i = 0; i < clusterPositions.length; i++) {
+            var clusterPosition = clusterPositions[i];
+            createCluster(clusterPosition[0], clusterPosition[1], this.width, 5, weights);
+        }
+
+        this.internalDistributeBudget(budget, min, weights);
+    }
+
+    internalDistributeBudget(budget, min, weights) {
         var subBudgets = new Array(this.tiles.length);
         var rands = new Array(this.tiles.length);
         var k = 0.0
