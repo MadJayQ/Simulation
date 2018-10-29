@@ -1,3 +1,5 @@
+from functools import reduce
+
 class Queue:
   #Constructor creates a list
   def __init__(self):

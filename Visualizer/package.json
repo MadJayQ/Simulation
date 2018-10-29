@@ -32,6 +32,7 @@
     "mime": "^2.3.1",
     "nouislider": "^11.1.0",
     "pandas-js": "^0.2.4",
+    "png-js": "^0.1.1",
     "popper.js": "^1.14.3",
     "python-shell": "^0.5.0",
     "random-seed": "^0.3.0",

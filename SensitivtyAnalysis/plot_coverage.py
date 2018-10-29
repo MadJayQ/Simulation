@@ -13,8 +13,8 @@ ts.plot()
 plt.savefig('test.pdf') 
 '''
 finaldata = {
-    'totalBudget': [0, 5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000, 75000],
-    'coverage': [40, 58, 60, 58, 63, 59, 60, 58, 63, 63, 68, 73, 68, 66, 65, 68],
+    'totalBudget': [0, 1000, 5000, 10000, 25000],
+    'coverage': [48, 74, 84, 72, 71],
 };
 df = pd.DataFrame(data=finaldata)
 df.plot(x='totalBudget', y='coverage', rot=0)

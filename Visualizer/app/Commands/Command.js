@@ -261,10 +261,11 @@ class CreateTestCaseCommand extends Command {
         var tileStarts = [262, 325, 25, 36, 80];
         var endTiles = [109, 173, 35, 294, 262];
 
+        
         this.world.tiles = [];
         this.world.tileData = undefined;
         this.world.constructTiles(w, h);
-
+        
         for(var i = 0; i < numCars; i++) {
             var startPos = this.world.tiles[tileStarts[i]].pos;
             var endPos = this.world.tiles[endTiles[i]].pos
@@ -274,29 +275,42 @@ class CreateTestCaseCommand extends Command {
                 capacity: 5000
             };
         }
-
+        
         this.world.settings.worldSettings.tileWidth = w;
         this.world.settings.worldSettings.tileHeight = h;
-
+        
         this.world.settings.carSettings = carSettings;
         this.world.settings.tileSettings = tileSettings;
         this.world.width = w;
         this.world.height = h;
         this.world.applySettings();
         this.world.setCarCapacity();
-
-        this.world.distributeBudget(25000, 0);
-
-        var serialziedWorld = this.world.serialize();
         
-        var netMsg = new NetMsg(NetMsg.Type.TYPE_COMMAND_RESPONSE);
-        pipe.sender.send("asynchronous-reply", netMsg.serialize(
-            {
-                type: CreateTestCaseCommand.REQ,
-                body: serialziedWorld
+        
+        var commandCtx = this;
+        var worldCtx = this.world;
+        var rewardMask = new require('png-js').load("reward_mask.png");
+        rewardMask.decode((pixels) => {
+            var weights = new Array(commandCtx.world.tiles.length);
+            var pixelCounter = 0;
+            for(var i = 0; i < pixels.length; i+=4) { //Forget alpha channel
+                var pixelData = [
+                    pixels[i], pixels[i + 1], pixels[i + 2]
+                ];
+                var weight = ((pixelData[0] + pixelData[1] + pixelData[2]) / 3) / 255;
+                weights[pixelCounter++] = weight;
             }
-        ));
+            worldCtx.distributeBudget(0, 0, weights);
+            var serialziedWorld = worldCtx.serialize();
+            var netMsg = new NetMsg(NetMsg.Type.TYPE_COMMAND_RESPONSE);
+            pipe.sender.send("asynchronous-reply", netMsg.serialize(
+                {
+                    type: CreateTestCaseCommand.REQ,
+                    body: serialziedWorld
+                }
+            ));
 
+        });
         console.log("DONE!");
     }
 

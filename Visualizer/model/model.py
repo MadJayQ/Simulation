@@ -34,13 +34,13 @@ def calculateMaximumTimeSensing(world):
 def calculateExpectedUtility(world, targetCell, currentCar):
     width = world["settings"]["worldSettings"]["tileWidth"];
     height = world["settings"]["worldSettings"]["tileHeight"];
-    reward = int(world["tiles"][str(targetCell)]["reward"]);
+    reward = int(world["tiles"][str(int(targetCell))]["reward"]);
     cellPosition = indexToCoordinates(targetCell, width);
     neighboringCells = getNeighboringCells(cellPosition[0], cellPosition[1], width, height); #Calculate our neighboring cells
     neighboringCars = [];
     for neighbor in neighboringCells: #Loop through all these cells, and count the number of cars
         #print(indexToCoordinates(neighbor, width));
-        neighborTile = world["tiles"][str(neighbor)];
+        neighborTile = world["tiles"][str(int(neighbor))];
         neighborEnts = neighborTile["attachedEnts"];
         #print("///");
         for ent in neighborEnts: #If not a car, discard

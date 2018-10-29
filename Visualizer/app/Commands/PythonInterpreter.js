@@ -16,7 +16,7 @@ class PythonInterpreter {
     startModule(world) {
         var serializedWorld = world.serialize();
         fs.writeFileSync('./data.json', serializedWorld);
-        var pythonPath = AppSettings().getInstance().pythonPath;
+        var pythonPath = "F:\\Programming\\Languages\\Emscripten\\python\\2.7.5.3_64bit\\python";//AppSettings().getInstance().pythonPath;
         this.shell = new PythonShell(
             this.executor, {
                 pythonOptions: ['-B'], 

@@ -108,16 +108,23 @@ class World {
         }
     }
 
-    distributeBudget(budget, min) {
+    distributeBudget(budget, min, weights) {
         var subBudgets = new Array(this.tiles.length);
         var rands = new Array(this.tiles.length);
         var k = 0.0
         var err = 0.0
         var sum = 0.0
         budget -= this.tiles.length * min;
-        for(var i = 0; i < this.tiles.length; i++) {
-            rands[i] = MathExt.seededRandFloat(0, 1);
-            sum += rands[i];
+        if(weights !== undefined) {
+            rands = weights;
+            for(var i = 0; i < rands.length; i++) {
+                sum += rands[i];
+            }
+        } else {
+            for(var i = 0; i < this.tiles.length; i++) {
+                rands[i] = MathExt.seededRandFloat(0, 1);
+                sum += rands[i];
+            }
         }
         k = budget / sum;
         for(var i = 1; i < this.tiles.length; i++) {
